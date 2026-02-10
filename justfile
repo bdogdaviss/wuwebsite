@@ -37,9 +37,19 @@ migrate-up:
     docker exec -i wakeup-postgres psql -U wakeup -d wakeup < apps/api/db/migrations/000004_create_block_rules.up.sql
     docker exec -i wakeup-postgres psql -U wakeup -d wakeup < apps/api/db/migrations/000005_create_files.up.sql
     docker exec -i wakeup-postgres psql -U wakeup -d wakeup < apps/api/db/migrations/000006_create_extension_codes.up.sql
+    docker exec -i wakeup-postgres psql -U wakeup -d wakeup < apps/api/db/migrations/000007_create_friendships.up.sql
+    docker exec -i wakeup-postgres psql -U wakeup -d wakeup < apps/api/db/migrations/000008_create_conversations.up.sql
+    docker exec -i wakeup-postgres psql -U wakeup -d wakeup < apps/api/db/migrations/000009_create_messages.up.sql
+    docker exec -i wakeup-postgres psql -U wakeup -d wakeup < apps/api/db/migrations/000010_create_nests.up.sql
+    docker exec -i wakeup-postgres psql -U wakeup -d wakeup < apps/api/db/migrations/000011_add_user_status.up.sql
 
 # Run database migrations down
 migrate-down:
+    docker exec -i wakeup-postgres psql -U wakeup -d wakeup < apps/api/db/migrations/000011_add_user_status.down.sql
+    docker exec -i wakeup-postgres psql -U wakeup -d wakeup < apps/api/db/migrations/000010_create_nests.down.sql
+    docker exec -i wakeup-postgres psql -U wakeup -d wakeup < apps/api/db/migrations/000009_create_messages.down.sql
+    docker exec -i wakeup-postgres psql -U wakeup -d wakeup < apps/api/db/migrations/000008_create_conversations.down.sql
+    docker exec -i wakeup-postgres psql -U wakeup -d wakeup < apps/api/db/migrations/000007_create_friendships.down.sql
     docker exec -i wakeup-postgres psql -U wakeup -d wakeup < apps/api/db/migrations/000006_create_extension_codes.down.sql
     docker exec -i wakeup-postgres psql -U wakeup -d wakeup < apps/api/db/migrations/000005_create_files.down.sql
     docker exec -i wakeup-postgres psql -U wakeup -d wakeup < apps/api/db/migrations/000004_create_block_rules.down.sql
