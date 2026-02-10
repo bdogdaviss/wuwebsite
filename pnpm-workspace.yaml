@@ -1,0 +1,6 @@
+packages:
+  - "apps/web"
+  - "apps/marketing"
+  - "apps/mobile"
+  - "apps/extension"
+  - "packages/*"

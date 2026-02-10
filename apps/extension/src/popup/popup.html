@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WakeUp</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div id="app">
+    <header>
+      <h1>WakeUp</h1>
+    </header>
+
+    <!-- Not Connected State -->
+    <div id="not-connected" class="section hidden">
+      <p class="status">Sign in to WakeUp</p>
+      <input type="email" id="email-input" placeholder="Email" class="input-field">
+      <input type="password" id="password-input" placeholder="Password" class="input-field">
+      <button id="login-btn" class="btn btn-primary">Sign In</button>
+      <p id="login-error" class="error hidden"></p>
+      <p class="hint">Don't have an account? <a href="http://localhost:3000/register" target="_blank">Sign up</a></p>
+    </div>
+
+    <!-- Connected State -->
+    <div id="connected" class="section hidden">
+      <p class="status" id="user-status">Connected</p>
+
+      <!-- Toggle -->
+      <div class="toggle-row">
+        <span>Blocking</span>
+        <label class="switch">
+          <input type="checkbox" id="enabled-toggle">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <!-- Active Session -->
+      <div id="active-session" class="session-box hidden">
+        <span class="session-label">Focus Active</span>
+        <span id="session-time" class="session-time">0m</span>
+      </div>
+
+      <!-- Focus Buttons -->
+      <div class="btn-group">
+        <button id="start-btn" class="btn btn-success">Start Focus</button>
+        <button id="stop-btn" class="btn btn-danger hidden">Stop Focus</button>
+      </div>
+
+      <!-- Sync & Info -->
+      <div class="info-row">
+        <span id="rule-count">0 rules active</span>
+        <button id="sync-btn" class="btn btn-small">Sync Rules</button>
+      </div>
+
+      <!-- Dashboard Link -->
+      <a href="http://localhost:3000" target="_blank" class="link">
+        Open Dashboard →
+      </a>
+
+      <!-- Disconnect -->
+      <button id="disconnect-btn" class="btn btn-ghost">Disconnect</button>
+    </div>
+  </div>
+
+  <script type="module" src="popup.ts"></script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+{
+  "name": "wakeup",
+  "private": true,
+  "packageManager": "pnpm@9.15.4",
+  "scripts": {
+    "dev:web": "pnpm --filter web dev",
+    "dev:marketing": "pnpm --filter marketing dev",
+    "dev:mobile": "pnpm --filter mobile dev",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "build": "pnpm -r build"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  },
+  "pnpm": {
+    "peerDependencyRules": {
+      "allowAny": ["react", "react-dom", "@types/react"]
+    },
+    "overrides": {
+      "react": "19.1.0",
+      "react-dom": "19.1.0",
+      "react-native": "0.81.5"
+    }
+  }
+}
