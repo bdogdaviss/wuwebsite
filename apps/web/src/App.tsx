@@ -20,7 +20,7 @@ function LoadingScreen() {
       flex={1}
       alignItems="center"
       justifyContent="center"
-      minHeight="100vh"
+      style={{ minHeight: 'var(--app-vh)' }}
       backgroundColor={discordColors.bgPrimary}
     >
       <Spinner size="large" color={discordColors.brandPrimary} />
@@ -134,7 +134,7 @@ function AppRoutes() {
 function App() {
   return (
     <Theme name="discordDark">
-      <div style={{ minHeight: '100vh', backgroundColor: discordColors.bgPrimary }}>
+      <div style={{ minHeight: 'var(--app-vh)', backgroundColor: discordColors.bgPrimary }}>
         <BrowserRouter>
           <AuthProvider>
             <AppRoutes />

@@ -219,9 +219,9 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: '100vh',
+    minHeight: 'var(--app-vh)',
     backgroundColor: discordColors.bgPrimary,
-    padding: 20,
+    padding: 'clamp(12px, 4vw, 20px)',
   } as React.CSSProperties,
   content: {
     width: '100%',

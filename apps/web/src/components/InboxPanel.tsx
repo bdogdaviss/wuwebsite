@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { discordColors } from '@wakeup/ui'
 import { useUIStore } from '../state/uiStore'
 
@@ -29,6 +30,13 @@ const typeIcons: Record<string, React.ReactNode> = {
 
 export function InboxPanel() {
   const { isInboxOpen, inboxTab, setInboxTab, toggleInbox } = useUIStore()
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 768)
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
 
   if (!isInboxOpen) return null
 
@@ -55,18 +63,22 @@ export function InboxPanel() {
       {/* Panel */}
       <div
         style={{
-          position: 'absolute',
-          top: 4,
+          position: isMobile ? 'fixed' : 'absolute',
+          top: isMobile ? 0 : 4,
           right: 0,
-          width: 480,
-          maxHeight: 'calc(100vh - 80px)',
+          left: isMobile ? 0 : undefined,
+          bottom: isMobile ? 0 : undefined,
+          width: isMobile ? '100%' : 480,
+          maxHeight: isMobile ? 'none' : 'calc(var(--app-vh) - 80px)',
           backgroundColor: discordColors.bgTertiary,
-          borderRadius: 8,
+          borderRadius: isMobile ? 0 : 8,
           boxShadow: '0 8px 16px rgba(0,0,0,0.24)',
           zIndex: 100,
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',
+          paddingTop: isMobile ? 'env(safe-area-inset-top)' : undefined,
+          paddingBottom: isMobile ? 'env(safe-area-inset-bottom)' : undefined,
         }}
       >
         {/* Header */}

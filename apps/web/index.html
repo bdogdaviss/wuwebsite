@@ -12,6 +12,15 @@
     <meta name="apple-mobile-web-app-title" content="Wakeup" />
     <title>Wakeup</title>
     <style>
+      :root {
+        --app-vh: 100dvh;
+      }
+      @supports not (height: 100dvh) {
+        :root {
+          --app-vh: 100vh;
+        }
+      }
+
       * {
         box-sizing: border-box;
         -webkit-tap-highlight-color: transparent;
@@ -20,7 +29,7 @@
         margin: 0;
         padding: 0;
         width: 100%;
-        height: 100%;
+        height: var(--app-vh);
         overflow: hidden;
         font-family: system-ui, -apple-system, sans-serif;
         -webkit-text-size-adjust: 100%;
@@ -30,7 +39,7 @@
       }
       #root {
         width: 100%;
-        height: 100%;
+        height: var(--app-vh);
         overflow: hidden;
       }
 

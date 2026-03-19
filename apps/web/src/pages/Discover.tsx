@@ -39,7 +39,7 @@ export function Discover() {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          padding: 48,
+          padding: 'clamp(16px, 5vw, 48px)',
           textAlign: 'center',
         }}
       >

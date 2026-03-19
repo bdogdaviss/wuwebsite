@@ -228,7 +228,7 @@ export function DiscordShell() {
 
   return (
     <>
-      <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100vw', overflow: 'hidden' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', height: 'var(--app-vh)', width: '100%', overflow: 'hidden' }}>
         {!isMobile && showBanner && <NotificationBanner onDismiss={() => setShowBanner(false)} />}
 
         {isMobile ? (
@@ -246,7 +246,7 @@ export function DiscordShell() {
                       "main"
                       "bottomnav"
                     `,
-                    gridTemplateRows: `${discordLayout.headerHeight}px 1fr 68px`,
+                    gridTemplateRows: `calc(${discordLayout.headerHeight}px + env(safe-area-inset-top)) 1fr calc(68px + env(safe-area-inset-bottom))`,
                     gridTemplateColumns: '1fr',
                     height: '100%',
                     width: '100%',
@@ -256,11 +256,12 @@ export function DiscordShell() {
                     style={{
                       gridArea: 'header',
                       backgroundColor: discordColors.bgPrimary,
-                      height: discordLayout.headerHeight,
+                      minHeight: discordLayout.headerHeight,
                       boxShadow: '0 1px 0 rgba(4,4,5,0.2), 0 1.5px 0 rgba(6,6,7,0.05)',
                       display: 'flex',
                       alignItems: 'center',
                       padding: '0 8px',
+                      paddingTop: 'env(safe-area-inset-top)',
                       zIndex: 1,
                     }}
                   >

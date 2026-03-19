@@ -8,7 +8,7 @@ const LoginContainer = styled(YStack, {
   flex: 1,
   alignItems: 'center',
   justifyContent: 'center',
-  minHeight: '100vh',
+  minHeight: 'var(--app-vh)',
   backgroundColor: discordColors.bgPrimary,
 })
 

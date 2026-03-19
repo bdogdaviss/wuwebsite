@@ -29,7 +29,7 @@ export function Register() {
   }
 
   return (
-    <YStack flex={1} alignItems="center" justifyContent="center" padding="$6" minHeight="100vh">
+    <YStack flex={1} alignItems="center" justifyContent="center" padding="$6" style={{ minHeight: 'var(--app-vh)' }}>
       <YStack width="100%" maxWidth={400} gap="$4">
         <H1 textAlign="center">Create Account</H1>
 

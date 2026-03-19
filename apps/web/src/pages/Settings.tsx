@@ -109,6 +109,7 @@ export function SettingsOverlay() {
             alignItems: 'center',
             justifyContent: 'space-between',
             padding: '12px 16px',
+            paddingTop: 'calc(12px + env(safe-area-inset-top))',
             backgroundColor: discordColors.bgSecondary,
             borderBottom: `1px solid ${discordColors.border}`,
           }}

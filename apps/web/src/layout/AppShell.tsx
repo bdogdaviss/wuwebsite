@@ -9,7 +9,7 @@ import { useUIStore } from '../state/uiStore'
 
 const ShellContainer = styled(XStack, {
   flex: 1,
-  height: '100vh',
+  height: 'var(--app-vh)',
   overflow: 'hidden',
 })
 

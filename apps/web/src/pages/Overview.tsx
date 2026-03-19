@@ -106,7 +106,7 @@ function FriendsListView() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* Search bar */}
-      <div style={{ padding: '16px 20px 8px' }}>
+      <div style={{ padding: '16px clamp(12px, 4vw, 20px) 8px' }}>
         <div
           style={{
             display: 'flex',
@@ -135,7 +135,7 @@ function FriendsListView() {
       </div>
 
       {/* Counter */}
-      <div style={{ padding: '12px 20px 4px' }}>
+      <div style={{ padding: '12px clamp(12px, 4vw, 20px) 4px' }}>
         <span
           style={{
             fontSize: 12,
@@ -150,7 +150,7 @@ function FriendsListView() {
       </div>
 
       {/* Friend list */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '0 20px' }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '0 clamp(12px, 4vw, 20px)' }}>
         {filtered.length === 0 && (
           <div
             style={{

@@ -36,7 +36,7 @@ export function ExtensionConnect() {
 
   if (!isAuthenticated) {
     return (
-      <YStack flex={1} alignItems="center" justifyContent="center" minHeight="100vh" padding="$6">
+      <YStack flex={1} alignItems="center" justifyContent="center" style={{ minHeight: 'var(--app-vh)' }} padding="$6">
         <YStack
           backgroundColor="$gray2"
           padding="$6"
@@ -60,7 +60,7 @@ export function ExtensionConnect() {
 
   if (code) {
     return (
-      <YStack flex={1} alignItems="center" justifyContent="center" minHeight="100vh" padding="$6">
+      <YStack flex={1} alignItems="center" justifyContent="center" style={{ minHeight: 'var(--app-vh)' }} padding="$6">
         <YStack
           backgroundColor="$gray2"
           padding="$6"
@@ -104,7 +104,7 @@ export function ExtensionConnect() {
   }
 
   return (
-    <YStack flex={1} alignItems="center" justifyContent="center" minHeight="100vh" padding="$6">
+    <YStack flex={1} alignItems="center" justifyContent="center" style={{ minHeight: 'var(--app-vh)' }} padding="$6">
       <YStack
         backgroundColor="$gray2"
         padding="$6"
