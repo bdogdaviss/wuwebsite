@@ -15,7 +15,7 @@ interface TabItem {
 export function MobileBottomNav() {
   const location = useLocation()
   const navigate = useNavigate()
-  const { openCommandPalette, unreadCounts } = useUIStore()
+  const { openCommandPalette, unreadCounts, toggleInbox, openSettings } = useUIStore()
   const { user } = useAuth()
 
   // Calculate total unread count for Inbox badge
@@ -39,7 +39,7 @@ export function MobileBottomNav() {
       id: 'inbox',
       label: 'Inbox',
       icon: Inbox,
-      route: '/inbox',
+      action: toggleInbox,
     },
     {
       id: 'discover',
@@ -51,7 +51,7 @@ export function MobileBottomNav() {
       id: 'profile',
       label: 'Me',
       icon: User,
-      route: '/profile',
+      action: openSettings,
     },
   ]
 
@@ -65,6 +65,9 @@ export function MobileBottomNav() {
 
   const isActive = (tab: TabItem) => {
     if (!tab.route) return false
+    if (tab.route === '/') {
+      return location.pathname === '/' || location.pathname.startsWith('/dm/')
+    }
     return location.pathname === tab.route
   }
 

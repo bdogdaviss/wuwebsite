@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { discordColors } from '@wakeup/ui'
 import { useUIStore } from '../state/uiStore'
 import { useMessageStore } from '../state/messageStore'
@@ -22,7 +22,7 @@ import {
   UserCircle,
   Hash,
   Menu,
-  Layers,
+  ArrowLeft,
 } from 'lucide-react'
 
 const routeIcons: Record<string, React.ReactNode> = {
@@ -45,7 +45,8 @@ const friendsTabs: { key: FriendsTab; label: string }[] = [
 
 export function MainHeader() {
   const location = useLocation()
-  const { toggleInfoPanel, isInfoPanelOpen, toggleInbox, isInboxOpen, friendsTab: activeTab, setFriendsTab: setActiveTab, openCommandPalette, unreadCounts, openLeftPanel, openCenterPanel } = useUIStore()
+  const navigate = useNavigate()
+  const { toggleInfoPanel, isInfoPanelOpen, toggleInbox, isInboxOpen, friendsTab: activeTab, setFriendsTab: setActiveTab, openCommandPalette, unreadCounts, openCenterPanel } = useUIStore()
   const { conversations } = useMessageStore()
   const { nestDetails } = useNestStore()
   const { user } = useAuth()
@@ -101,15 +102,10 @@ export function MainHeader() {
             padding: '0 8px',
           }}
         >
-          {/* Left: Menu buttons */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <HeaderAction onClick={openLeftPanel}>
-              <Layers size={20} color={discordColors.interactiveNormal} />
-            </HeaderAction>
-            <HeaderAction onClick={openCenterPanel}>
-              <Menu size={20} color={discordColors.interactiveNormal} />
-            </HeaderAction>
-          </div>
+          {/* Left: Back button */}
+          <HeaderAction onClick={() => navigate('/')}>
+            <ArrowLeft size={20} color={discordColors.interactiveNormal} />
+          </HeaderAction>
 
           {/* Center: Channel name */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0, flex: 1, justifyContent: 'center' }}>
@@ -215,9 +211,9 @@ export function MainHeader() {
             padding: '0 8px',
           }}
         >
-          {/* Left: Menu button */}
-          <HeaderAction onClick={openCenterPanel}>
-            <Menu size={20} color={discordColors.interactiveNormal} />
+          {/* Left: Back button */}
+          <HeaderAction onClick={() => navigate('/')}>
+            <ArrowLeft size={20} color={discordColors.interactiveNormal} />
           </HeaderAction>
 
           {/* Center: DM name */}

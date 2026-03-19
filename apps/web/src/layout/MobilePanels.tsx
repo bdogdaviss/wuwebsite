@@ -14,7 +14,7 @@ const LEFT_PANEL_WIDTH = 280
 const CENTER_PANEL_WIDTH = 280
 
 export function MobilePanels({ leftPanel, centerPanel, rightPanel }: MobilePanelsProps) {
-  const { mobilePanelState, closeMobilePanels } = useUIStore()
+  const { mobilePanelState, closeMobilePanels, openCenterPanel } = useUIStore()
 
   // Animation for left panel (server/nest list)
   const [leftPanelSpring, leftPanelApi] = useSpring(() => ({
@@ -66,6 +66,20 @@ export function MobilePanels({ leftPanel, centerPanel, rightPanel }: MobilePanel
           leftPanelApi.start({ x: 0 })
           backdropApi.start({ opacity: 1 })
         }
+      }
+    },
+    {
+      axis: 'x',
+      filterTaps: true,
+    }
+  )
+
+  // Edge swipe from left side to open center panel
+  const edgeBind = useDrag(
+    ({ active, movement: [mx], velocity: [vx], direction: [dirX] }) => {
+      if (mobilePanelState !== 'closed') return
+      if (!active && (mx > 50 || (vx > 0.3 && dirX > 0 && mx > 15))) {
+        openCenterPanel()
       }
     },
     {
@@ -142,6 +156,22 @@ export function MobilePanels({ leftPanel, centerPanel, rightPanel }: MobilePanel
       >
         {rightPanel}
       </div>
+
+      {/* Edge swipe zone to open panels */}
+      {mobilePanelState === 'closed' && (
+        <div
+          {...edgeBind()}
+          style={{
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            bottom: 0,
+            width: 20,
+            zIndex: 8,
+            touchAction: 'pan-y',
+          }}
+        />
+      )}
     </div>
   )
 }
