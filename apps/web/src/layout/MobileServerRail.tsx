@@ -79,7 +79,7 @@ export function MobileServerRail() {
         </div>
         <span
           style={{
-            fontSize: 11,
+            fontSize: 13,
             fontWeight: 600,
             color: activeNestId === 'home' ? discordColors.textNormal : discordColors.textMuted,
           }}
@@ -153,7 +153,7 @@ export function MobileServerRail() {
                   borderRadius: 10,
                   backgroundColor: discordColors.red,
                   color: 'white',
-                  fontSize: 10,
+                  fontSize: 11,
                   fontWeight: 700,
                   display: 'flex',
                   alignItems: 'center',
@@ -168,7 +168,7 @@ export function MobileServerRail() {
 
             <span
               style={{
-                fontSize: 11,
+                fontSize: 13,
                 fontWeight: 600,
                 color: activeNestId === nest.id ? discordColors.textNormal : discordColors.textMuted,
                 textAlign: 'center',
@@ -214,7 +214,7 @@ export function MobileServerRail() {
         </div>
         <span
           style={{
-            fontSize: 11,
+            fontSize: 13,
             fontWeight: 600,
             color: discordColors.textMuted,
           }}
@@ -256,7 +256,7 @@ export function MobileServerRail() {
           />
           <span
             style={{
-              fontSize: 11,
+              fontSize: 13,
               fontWeight: 600,
               color: discordColors.textMuted,
               maxWidth: 70,

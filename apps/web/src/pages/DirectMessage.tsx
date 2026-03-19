@@ -219,8 +219,10 @@ export function DirectMessage() {
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
-              padding: '10px 0',
+              padding: '12px 4px',
               marginRight: 4,
+              minWidth: 44,
+              minHeight: 44,
             }}
           >
             <Plus size={20} color={discordColors.interactiveNormal} />
@@ -238,8 +240,9 @@ export function DirectMessage() {
               border: 'none',
               outline: 'none',
               color: discordColors.textNormal,
-              fontSize: 15,
-              padding: '11px 8px',
+              fontSize: 16,
+              padding: '14px 8px',
+              minHeight: 48,
             }}
           />
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>

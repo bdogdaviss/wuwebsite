@@ -19,6 +19,12 @@ const LoginCard = styled(YStack, {
   borderRadius: 8,
   padding: 32,
   gap: 20,
+  marginHorizontal: 16,
+
+  $sm: {
+    padding: 20,
+    marginHorizontal: 12,
+  },
 })
 
 const Title = styled(Text, {
@@ -45,11 +51,12 @@ const FormLabel = styled(Text, {
 const StyledInput = styled(Input, {
   backgroundColor: discordColors.bgTertiary,
   borderWidth: 0,
-  borderRadius: 3,
+  borderRadius: 6,
   paddingHorizontal: 12,
-  paddingVertical: 10,
+  paddingVertical: 12,
   fontSize: 16,
   color: discordColors.textNormal,
+  minHeight: 48,
 
   focusStyle: {
     outlineWidth: 2,

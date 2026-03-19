@@ -134,7 +134,7 @@ const mobileGridStyles = {
     "main"
     "bottomnav"
   `,
-  gridTemplateRows: `${discordLayout.headerHeight}px 1fr 60px`,
+  gridTemplateRows: `${discordLayout.headerHeight}px 1fr 68px`,
   gridTemplateColumns: '1fr',
 } as const
 
@@ -246,7 +246,7 @@ export function DiscordShell() {
                       "main"
                       "bottomnav"
                     `,
-                    gridTemplateRows: `${discordLayout.headerHeight}px 1fr 60px`,
+                    gridTemplateRows: `${discordLayout.headerHeight}px 1fr 68px`,
                     gridTemplateColumns: '1fr',
                     height: '100%',
                     width: '100%',

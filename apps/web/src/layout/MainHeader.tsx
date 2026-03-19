@@ -177,7 +177,7 @@ export function MainHeader() {
                 color: 'white',
                 borderRadius: 8,
                 padding: '0 4px',
-                fontSize: 10,
+                fontSize: 11,
                 fontWeight: 700,
                 minWidth: 16,
                 height: 16,
@@ -310,7 +310,7 @@ export function MainHeader() {
                 color: 'white',
                 borderRadius: 8,
                 padding: '0 4px',
-                fontSize: 10,
+                fontSize: 11,
                 fontWeight: 700,
                 minWidth: 16,
                 height: 16,
@@ -511,8 +511,10 @@ function HeaderAction({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: 4,
-        borderRadius: 4,
+        padding: 10,
+        borderRadius: 8,
+        minWidth: 44,
+        minHeight: 44,
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.color = discordColors.interactiveHover

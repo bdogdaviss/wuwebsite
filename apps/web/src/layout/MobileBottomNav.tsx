@@ -75,11 +75,11 @@ export function MobileBottomNav() {
         bottom: 0,
         left: 0,
         right: 0,
-        height: 60,
+        height: 68,
         backgroundColor: discordColors.bgSecondary,
         borderTop: `1px solid ${discordColors.bgModifierActive}`,
         display: 'flex',
-        alignItems: 'center',
+        alignItems: 'stretch',
         justifyContent: 'space-around',
         paddingBottom: 'env(safe-area-inset-bottom)',
         zIndex: 100,
@@ -99,10 +99,11 @@ export function MobileBottomNav() {
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: 2,
+              gap: 4,
               cursor: 'pointer',
               flex: 1,
-              padding: '8px 4px',
+              padding: '10px 4px',
+              minHeight: 48,
               position: 'relative',
             }}
           >
@@ -127,10 +128,10 @@ export function MobileBottomNav() {
                       color: 'white',
                       borderRadius: 10,
                       padding: '0 5px',
-                      fontSize: 10,
+                      fontSize: 11,
                       fontWeight: 700,
-                      minWidth: 20,
-                      height: 20,
+                      minWidth: 18,
+                      height: 18,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -143,7 +144,7 @@ export function MobileBottomNav() {
             )}
             <span
               style={{
-                fontSize: 10,
+                fontSize: 12,
                 fontWeight: 600,
                 color,
               }}
