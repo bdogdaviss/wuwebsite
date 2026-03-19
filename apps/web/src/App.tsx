@@ -10,6 +10,7 @@ import { Rituals } from './pages/Rituals'
 import { DirectMessage } from './pages/DirectMessage'
 import { NestChannelView } from './pages/NestChannelView'
 import { ExtensionConnect } from './pages/ExtensionConnect'
+import { YouWake, hasCompletedYouWake } from './pages/YouWake'
 import { discordColors } from '@wakeup/ui'
 import { InstallPrompt } from './components/InstallPrompt'
 
@@ -41,6 +42,14 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
     return <Navigate to="/login" replace />
   }
 
+  return <>{children}</>
+}
+
+/** Redirects to /you-wake if the user hasn't completed it this session */
+function RequireYouWake({ children }: { children: React.ReactNode }) {
+  if (!hasCompletedYouWake()) {
+    return <Navigate to="/you-wake" replace />
+  }
   return <>{children}</>
 }
 
@@ -79,6 +88,16 @@ function AppRoutes() {
         }
       />
 
+      {/* You Wake? screen — shown once per session before dashboard */}
+      <Route
+        path="/you-wake"
+        element={
+          <ProtectedRoute>
+            <YouWake />
+          </ProtectedRoute>
+        }
+      />
+
       {/* Extension connect - protected but outside AppShell */}
       <Route
         path="/extension-connect"
@@ -89,11 +108,13 @@ function AppRoutes() {
         }
       />
 
-      {/* Protected routes with DiscordShell */}
+      {/* Protected routes with DiscordShell — gated behind YouWake */}
       <Route
         element={
           <ProtectedRoute>
-            <DiscordShell />
+            <RequireYouWake>
+              <DiscordShell />
+            </RequireYouWake>
           </ProtectedRoute>
         }
       >
