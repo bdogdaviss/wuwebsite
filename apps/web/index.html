@@ -11,6 +11,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Wakeup" />
     <title>Wakeup</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/philfung/add-to-homescreen@3.5/dist/add-to-homescreen.min.css" />
+    <script src="https://cdn.jsdelivr.net/gh/philfung/add-to-homescreen@3.5/dist/add-to-homescreen.min.js"></script>
     <style>
       :root {
         --app-vh: 100dvh;
@@ -74,5 +76,22 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        if (window.AddToHomeScreen) {
+          window.AddToHomeScreenInstance = window.AddToHomeScreen({
+            appName: 'Wakeup',
+            appNameDisplay: 'standalone',
+            appIconUrl: 'apple-touch-icon.png',
+            assetUrl: 'https://cdn.jsdelivr.net/gh/philfung/add-to-homescreen@3.5/dist/assets/img/',
+            maxModalDisplayCount: -1,
+            displayOptions: { showMobile: true, showDesktop: true },
+            allowClose: true,
+            showArrow: true,
+          });
+          window.AddToHomeScreenInstance.show('en');
+        }
+      });
+    </script>
   </body>
 </html>
