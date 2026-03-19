@@ -6,11 +6,14 @@ import { ChannelSidebar } from './ChannelSidebar'
 import { MainHeader } from './MainHeader'
 import { MainContent } from './MainContent'
 import { MembersList } from './MembersList'
+import { MobileBottomNav } from './MobileBottomNav'
+import { MobilePanels } from './MobilePanels'
+import { MobileServerRail } from './MobileServerRail'
 import { CommandPalette } from '../components/CommandPalette'
 import { SettingsOverlay } from '../pages/Settings'
 import { CreateGroupDm } from '../components/CreateGroupDm'
 import { useUIStore } from '../state/uiStore'
-import { X } from 'lucide-react'
+import { X, Menu } from 'lucide-react'
 
 // ─── Flying Bird Intro Animation ─────────────────────────────────
 const BIRD_ANIM_KEY = 'wakeup-bird-anim-played'
@@ -121,6 +124,20 @@ const gridStylesCollapsed = {
   gridTemplateColumns: `${discordLayout.railWidth}px ${discordLayout.sidebarWidth}px 1fr`,
 } as const
 
+const mobileGridStyles = {
+  display: 'grid',
+  height: '100%',
+  width: '100%',
+  overflow: 'hidden',
+  gridTemplateAreas: `
+    "header"
+    "main"
+    "bottomnav"
+  `,
+  gridTemplateRows: `${discordLayout.headerHeight}px 1fr 60px`,
+  gridTemplateColumns: '1fr',
+} as const
+
 function NotificationBanner({ onDismiss }: { onDismiss: () => void }) {
   return (
     <div
@@ -176,10 +193,11 @@ export function DiscordShell() {
   const { toggleInfoPanel, isInfoPanelOpen, isCommandPaletteOpen, openCommandPalette, closeCommandPalette } = useUIStore()
   const [showBanner, setShowBanner] = useState(true)
   const [showBirdAnim, setShowBirdAnim] = useState(() => !sessionStorage.getItem(BIRD_ANIM_KEY))
+  const [isMobile, setIsMobile] = useState(false)
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'p')) {
         e.preventDefault()
         openCommandPalette()
       }
@@ -196,73 +214,144 @@ export function DiscordShell() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [handleKeyDown])
 
+  // Mobile detection
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
+  const gridStyle = isMobile ? mobileGridStyles : (isInfoPanelOpen ? gridStyles : gridStylesCollapsed)
+
   return (
     <>
       <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100vw', overflow: 'hidden' }}>
-        {showBanner && <NotificationBanner onDismiss={() => setShowBanner(false)} />}
-        <div style={{ ...(isInfoPanelOpen ? gridStyles : gridStylesCollapsed), height: undefined, flex: 1, overflow: 'hidden' }}>
-        <nav
-          style={{
-            gridArea: 'rail',
-            backgroundColor: discordColors.bgTertiary,
-            overflow: 'hidden',
-          }}
-        >
-          <ServerRail />
-        </nav>
+        {!isMobile && showBanner && <NotificationBanner onDismiss={() => setShowBanner(false)} />}
 
-        <aside
-          style={{
-            gridArea: 'sidebar',
-            backgroundColor: discordColors.bgSecondary,
-            display: 'flex',
-            flexDirection: 'column',
-            overflow: 'hidden',
-          }}
-        >
-          <ChannelSidebar />
-        </aside>
+        {isMobile ? (
+          // Mobile layout with panels system
+          <div style={{ flex: 1, overflow: 'hidden' }}>
+            <MobilePanels
+              leftPanel={<MobileServerRail />}
+              centerPanel={<ChannelSidebar />}
+              rightPanel={
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateAreas: `
+                      "header"
+                      "main"
+                      "bottomnav"
+                    `,
+                    gridTemplateRows: `${discordLayout.headerHeight}px 1fr 60px`,
+                    gridTemplateColumns: '1fr',
+                    height: '100%',
+                    width: '100%',
+                  }}
+                >
+                  <header
+                    style={{
+                      gridArea: 'header',
+                      backgroundColor: discordColors.bgPrimary,
+                      height: discordLayout.headerHeight,
+                      boxShadow: '0 1px 0 rgba(4,4,5,0.2), 0 1.5px 0 rgba(6,6,7,0.05)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      padding: '0 8px',
+                      zIndex: 1,
+                    }}
+                  >
+                    <MainHeader />
+                  </header>
 
-        <header
-          style={{
-            gridArea: 'header',
-            backgroundColor: discordColors.bgPrimary,
-            height: discordLayout.headerHeight,
-            boxShadow: '0 1px 0 rgba(4,4,5,0.2), 0 1.5px 0 rgba(6,6,7,0.05)',
-            display: 'flex',
-            alignItems: 'center',
-            padding: '0 8px',
-            zIndex: 1,
-          }}
-        >
-          <MainHeader />
-        </header>
+                  <main
+                    style={{
+                      gridArea: 'main',
+                      backgroundColor: discordColors.bgPrimary,
+                      overflow: 'hidden',
+                    }}
+                  >
+                    <MainContent>
+                      <Outlet />
+                    </MainContent>
+                  </main>
 
-        <main
-          style={{
-            gridArea: 'main',
-            backgroundColor: discordColors.bgPrimary,
-            overflow: 'hidden',
-          }}
-        >
-          <MainContent>
-            <Outlet />
-          </MainContent>
-        </main>
+                  <nav style={{ gridArea: 'bottomnav' }}>
+                    <MobileBottomNav />
+                  </nav>
+                </div>
+              }
+            />
+          </div>
+        ) : (
+          // Desktop layout with grid
+          <div style={{ ...gridStyle, height: undefined, flex: 1, overflow: 'hidden' }}>
+            <nav
+              style={{
+                gridArea: 'rail',
+                backgroundColor: discordColors.bgTertiary,
+                overflow: 'hidden',
+              }}
+            >
+              <ServerRail />
+            </nav>
 
-        {isInfoPanelOpen && (
-          <aside
-            style={{
-              gridArea: 'aside',
-              backgroundColor: discordColors.bgSecondary,
-              borderLeft: `1px solid ${discordColors.border}`,
-              overflow: 'auto',
-            }}
-          >
-            <MembersList />
-          </aside>
+            <aside
+              style={{
+                gridArea: 'sidebar',
+                backgroundColor: discordColors.bgSecondary,
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden',
+              }}
+            >
+              <ChannelSidebar />
+            </aside>
+
+            <header
+              style={{
+                gridArea: 'header',
+                backgroundColor: discordColors.bgPrimary,
+                height: discordLayout.headerHeight,
+                boxShadow: '0 1px 0 rgba(4,4,5,0.2), 0 1.5px 0 rgba(6,6,7,0.05)',
+                display: 'flex',
+                alignItems: 'center',
+                padding: '0 8px',
+                zIndex: 1,
+              }}
+            >
+              <MainHeader />
+            </header>
+
+            <main
+              style={{
+                gridArea: 'main',
+                backgroundColor: discordColors.bgPrimary,
+                overflow: 'hidden',
+              }}
+            >
+              <MainContent>
+                <Outlet />
+              </MainContent>
+            </main>
+
+            {isInfoPanelOpen && (
+              <aside
+                style={{
+                  gridArea: 'aside',
+                  backgroundColor: discordColors.bgSecondary,
+                  borderLeft: `1px solid ${discordColors.border}`,
+                  overflow: 'auto',
+                }}
+              >
+                <MembersList />
+              </aside>
+            )}
+          </div>
         )}
-      </div>
       </div>
 
       <CommandPalette

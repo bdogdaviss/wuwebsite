@@ -10,6 +10,7 @@ interface SocialState {
   fetchFriends: (api: ApiClient) => Promise<void>
   fetchPending: (api: ApiClient) => Promise<void>
   fetchOnlineFriends: (api: ApiClient) => Promise<void>
+  updateFriendStatus: (userId: string, status: string) => void
   sendRequest: (api: ApiClient, userId: string) => Promise<void>
   acceptRequest: (api: ApiClient, id: string) => Promise<void>
   rejectRequest: (api: ApiClient, id: string) => Promise<void>
@@ -49,6 +50,19 @@ export const useSocialStore = create<SocialState>()((set, get) => ({
     } catch {
       // ignore
     }
+  },
+
+  updateFriendStatus: (userId, status) => {
+    set((state) => {
+      // Update online friends list
+      const updatedOnlineFriends = state.onlineFriends.map((friend) =>
+        friend.id === userId ? { ...friend, status } : friend
+      )
+      // Filter out offline friends from the online list
+      const filteredOnlineFriends = updatedOnlineFriends.filter((f) => f.status !== 'offline')
+
+      return { onlineFriends: filteredOnlineFriends }
+    })
   },
 
   sendRequest: async (api, userId) => {

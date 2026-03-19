@@ -28,6 +28,7 @@ export function SettingsOverlay() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [activeSection, setActiveSection] = useState<SettingsSection>('my-account')
+  const [isMobile, setIsMobile] = useState(false)
 
   // ESC key to close
   const handleKeyDown = useCallback(
@@ -43,6 +44,16 @@ export function SettingsOverlay() {
       return () => window.removeEventListener('keydown', handleKeyDown)
     }
   }, [isSettingsOpen, handleKeyDown])
+
+  // Mobile detection
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   if (!isSettingsOpen) return null
 
@@ -68,6 +79,149 @@ export function SettingsOverlay() {
   const handleLogout = () => {
     closeSettings()
     logout()
+  }
+
+  if (isMobile) {
+    return (
+      <div
+        style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 100,
+          display: 'flex',
+          flexDirection: 'column',
+          backgroundColor: discordColors.bgPrimary,
+        }}
+      >
+        {/* Hidden file input */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleFileChange}
+          style={{ display: 'none' }}
+        />
+
+        {/* Mobile header with close button */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '12px 16px',
+            backgroundColor: discordColors.bgSecondary,
+            borderBottom: `1px solid ${discordColors.border}`,
+          }}
+        >
+          <h2
+            style={{
+              fontSize: 18,
+              fontWeight: 600,
+              color: discordColors.headerPrimary,
+              margin: 0,
+            }}
+          >
+            Settings
+          </h2>
+          <div
+            onClick={closeSettings}
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: 16,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              backgroundColor: discordColors.bgModifierActive,
+            }}
+          >
+            <X size={18} color={discordColors.interactiveNormal} />
+          </div>
+        </div>
+
+        {/* Mobile tabs */}
+        <div
+          style={{
+            display: 'flex',
+            gap: 8,
+            padding: '12px 16px',
+            overflowX: 'auto',
+            backgroundColor: discordColors.bgSecondary,
+            borderBottom: `1px solid ${discordColors.border}`,
+          }}
+        >
+          {settingsNav
+            .filter((item) => item.section !== 'header' && item.section !== 'divider')
+            .map((item) => {
+              const Icon = item.icon!
+              const isActive = activeSection === item.section
+              return (
+                <div
+                  key={item.section}
+                  onClick={() => setActiveSection(item.section as SettingsSection)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    padding: '8px 16px',
+                    borderRadius: 20,
+                    cursor: 'pointer',
+                    backgroundColor: isActive ? discordColors.brandPrimary : discordColors.bgModifierActive,
+                    color: '#ffffff',
+                    fontSize: 14,
+                    fontWeight: 500,
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0,
+                  }}
+                >
+                  <Icon size={16} />
+                  {item.label}
+                </div>
+              )
+            })}
+          <div
+            onClick={handleLogout}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '8px 16px',
+              borderRadius: 20,
+              cursor: 'pointer',
+              backgroundColor: discordColors.red,
+              color: '#ffffff',
+              fontSize: 14,
+              fontWeight: 500,
+              whiteSpace: 'nowrap',
+              flexShrink: 0,
+            }}
+          >
+            <LogOut size={16} />
+            Log Out
+          </div>
+        </div>
+
+        {/* Mobile content */}
+        <div
+          style={{
+            flex: 1,
+            overflowY: 'auto',
+            padding: '16px',
+          }}
+        >
+          {activeSection === 'my-account' && (
+            <MyAccountSection
+              user={user}
+              isUploading={isUploading}
+              onAvatarClick={handleAvatarClick}
+            />
+          )}
+          {activeSection === 'interface' && <InterfaceSection />}
+          {activeSection === 'shortcuts' && <ShortcutsSection />}
+        </div>
+      </div>
+    )
   }
 
   return (

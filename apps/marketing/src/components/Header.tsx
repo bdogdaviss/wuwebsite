@@ -16,12 +16,13 @@ export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-gray-950/80 backdrop-blur-md border-b border-gray-800">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
+          {/* Logo - smaller on mobile, full size on desktop */}
           <Link href="/" className="flex items-center gap-2">
-            <span className="text-2xl font-bold text-brand-600">WakeUp</span>
+            <img src="/logo.png" alt="WakeUp" className="w-10 h-10 md:w-24 md:h-24" />
+            <span className="text-xl md:text-2xl font-bold text-white">WakeUp</span>
           </Link>
 
           {/* Desktop Nav */}
@@ -30,7 +31,7 @@ export function Header() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-gray-600 hover:text-gray-900 font-medium transition-colors"
+                className="text-gray-400 hover:text-white font-medium transition-colors"
               >
                 {link.label}
               </Link>
@@ -41,7 +42,7 @@ export function Header() {
           <div className="hidden md:flex items-center gap-3">
             <a
               href={links.signIn}
-              className="px-4 py-2 text-gray-700 font-medium hover:text-gray-900 transition-colors"
+              className="px-4 py-2 text-gray-300 font-medium hover:text-white transition-colors"
             >
               Sign in
             </a>
@@ -53,9 +54,9 @@ export function Header() {
             </a>
           </div>
 
-          {/* Mobile menu button */}
+          {/* Mobile menu button - 44px min touch target for iOS */}
           <button
-            className="md:hidden p-2"
+            className="md:hidden p-3 -mr-2 text-gray-400 active:text-white"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             <svg
@@ -73,30 +74,30 @@ export function Header() {
           </button>
         </div>
 
-        {/* Mobile Nav */}
+        {/* Mobile Nav - larger touch targets */}
         {mobileMenuOpen && (
-          <div className="md:hidden py-4 border-t border-gray-100">
-            <div className="flex flex-col gap-2">
+          <div className="md:hidden py-4 border-t border-gray-800">
+            <div className="flex flex-col gap-1">
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg"
+                  className="px-4 py-3 text-gray-400 hover:bg-gray-800 active:bg-gray-700 rounded-lg text-lg"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   {link.label}
                 </Link>
               ))}
-              <hr className="my-2" />
+              <hr className="my-2 border-gray-800" />
               <a
                 href={links.signIn}
-                className="px-4 py-2 text-gray-700 font-medium"
+                className="px-4 py-3 text-gray-300 font-medium text-lg"
               >
                 Sign in
               </a>
               <a
                 href={links.createAccount}
-                className="mx-4 py-2 bg-brand-600 text-white font-medium rounded-lg text-center"
+                className="mx-4 py-3 bg-brand-600 text-white font-medium rounded-lg text-center text-lg active:bg-brand-700"
               >
                 Get Started
               </a>

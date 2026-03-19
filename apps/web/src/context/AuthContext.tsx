@@ -3,6 +3,7 @@ import { createApiClient, WakeupSocket, type User, type ApiClient, type Message,
 import { useSocialStore } from '../state/socialStore'
 import { useMessageStore } from '../state/messageStore'
 import { useNestStore } from '../state/nestStore'
+import { useUIStore } from '../state/uiStore'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 const WS_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8080').replace('http', 'ws') + '/ws'
@@ -56,11 +57,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     wsRef.current = ws
 
     ws.on('message.new', (data) => {
-      useMessageStore.getState().addIncomingMessage(data as Message)
+      const message = data as Message
+      useMessageStore.getState().addIncomingMessage(message)
+
+      // Increment unread if message is not from current user and conversation is not currently open
+      const currentUserId = user?.id
+      const currentPath = window.location.pathname
+      const isCurrentConversation = currentPath === `/dm/${message.conversation_id}`
+
+      if (message.sender_id !== currentUserId && !isCurrentConversation) {
+        useUIStore.getState().incrementUnread('conversation', message.conversation_id)
+      }
     })
 
     ws.on('channel_message.new', (data) => {
-      useMessageStore.getState().addIncomingChannelMessage(data as ChannelMessage)
+      const message = data as ChannelMessage
+      useMessageStore.getState().addIncomingChannelMessage(message)
+
+      // Increment unread if message is not from current user and channel is not currently open
+      const currentUserId = user?.id
+      const currentPath = window.location.pathname
+      const isCurrentChannel = currentPath.includes(`/${message.channel_id}`)
+
+      if (message.sender_id !== currentUserId && !isCurrentChannel) {
+        useUIStore.getState().incrementUnread('channel', message.channel_id)
+      }
     })
 
     ws.on('friend.request', () => {
@@ -73,7 +94,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       useSocialStore.getState().fetchOnlineFriends(api)
     })
 
-    ws.on('status.update', () => {
+    ws.on('status.update', (data: any) => {
+      // Real-time status update
+      const { user_id, status } = data
+      useSocialStore.getState().updateFriendStatus(user_id, status)
+      // Also refresh online friends to ensure consistency
       useSocialStore.getState().fetchOnlineFriends(api)
     })
 

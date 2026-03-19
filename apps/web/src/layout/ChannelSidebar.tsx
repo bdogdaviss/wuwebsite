@@ -24,6 +24,7 @@ const statusOptions: { key: 'online' | 'idle' | 'dnd' | 'offline'; label: string
 
 function StatusPicker({ isOpen, onClose, anchorRef }: { isOpen: boolean; onClose: () => void; anchorRef: React.RefObject<HTMLDivElement | null> }) {
   const { userStatus, setUserStatus } = useUIStore()
+  const { api } = useAuth()
   const pickerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -37,6 +38,20 @@ function StatusPicker({ isOpen, onClose, anchorRef }: { isOpen: boolean; onClose
     document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
   }, [isOpen, onClose, anchorRef])
+
+  const handleStatusChange = async (newStatus: 'online' | 'idle' | 'dnd' | 'offline') => {
+    try {
+      // Update local state immediately for responsive UI
+      setUserStatus(newStatus)
+      // Send to API
+      await api.updateStatus(newStatus)
+      onClose()
+    } catch (error) {
+      console.error('Failed to update status:', error)
+      // Revert on error
+      setUserStatus(userStatus)
+    }
+  }
 
   if (!isOpen) return null
 
@@ -62,10 +77,7 @@ function StatusPicker({ isOpen, onClose, anchorRef }: { isOpen: boolean; onClose
       {statusOptions.map((opt) => (
         <div
           key={opt.key}
-          onClick={() => {
-            setUserStatus(opt.key)
-            onClose()
-          }}
+          onClick={() => handleStatusChange(opt.key)}
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -106,7 +118,7 @@ const navItems = [
 function HomeSidebar() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { setActiveNavKey, openSettings, openCommandPalette, openCreateGroup, toggleMute, toggleDeafen, isMuted, isDeafened, hideDm, hiddenDmIds, userStatus } = useUIStore()
+  const { setActiveNavKey, openSettings, openCommandPalette, openCreateGroup, toggleMute, toggleDeafen, isMuted, isDeafened, hideDm, hiddenDmIds, userStatus, unreadCounts } = useUIStore()
   const { user } = useAuth()
   const { conversations } = useMessageStore()
   const { onlineFriends } = useSocialStore()
@@ -398,6 +410,28 @@ function HomeSidebar() {
                 {dm.subtitle}
               </div>
             </div>
+            {/* Unread badge */}
+            {unreadCounts.conversations[dm.id] > 0 && (
+              <div
+                style={{
+                  marginLeft: 'auto',
+                  backgroundColor: discordColors.red,
+                  color: 'white',
+                  borderRadius: 12,
+                  padding: '2px 6px',
+                  fontSize: 11,
+                  fontWeight: 700,
+                  minWidth: 20,
+                  height: 20,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}
+              >
+                {unreadCounts.conversations[dm.id] > 99 ? '99+' : unreadCounts.conversations[dm.id]}
+              </div>
+            )}
             {/* Close button on hover */}
             <div
               className="dm-close"
@@ -452,7 +486,7 @@ function HomeSidebar() {
 
 function NestSidebar({ nestId }: { nestId: string }) {
   const navigate = useNavigate()
-  const { activeChannelId, setActiveChannel, openSettings, toggleMute, toggleDeafen, isMuted, isDeafened, userStatus } = useUIStore()
+  const { activeChannelId, setActiveChannel, openSettings, toggleMute, toggleDeafen, isMuted, isDeafened, userStatus, unreadCounts } = useUIStore()
   const { user } = useAuth()
   const [showStatusPicker, setShowStatusPicker] = useState(false)
   const statusPanelRef = useRef<HTMLDivElement>(null)
@@ -595,6 +629,28 @@ function NestSidebar({ nestId }: { nestId: string }) {
                     >
                       {channel.name}
                     </span>
+                    {/* Unread badge */}
+                    {unreadCounts.channels[channel.id] > 0 && (
+                      <div
+                        style={{
+                          marginLeft: 'auto',
+                          backgroundColor: discordColors.red,
+                          color: 'white',
+                          borderRadius: 12,
+                          padding: '2px 6px',
+                          fontSize: 11,
+                          fontWeight: 700,
+                          minWidth: 20,
+                          height: 20,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0,
+                        }}
+                      >
+                        {unreadCounts.channels[channel.id] > 99 ? '99+' : unreadCounts.channels[channel.id]}
+                      </div>
+                    )}
                   </div>
                 )
               })}

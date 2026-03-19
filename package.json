@@ -15,12 +15,21 @@
   },
   "pnpm": {
     "peerDependencyRules": {
-      "allowAny": ["react", "react-dom", "@types/react"]
+      "allowAny": [
+        "react",
+        "react-dom",
+        "@types/react"
+      ]
     },
     "overrides": {
       "react": "19.1.0",
       "react-dom": "19.1.0",
       "react-native": "0.81.5"
     }
+  },
+  "dependencies": {
+    "@react-spring/web": "^10.0.3",
+    "@use-gesture/react": "^10.3.1",
+    "fuse.js": "^7.1.0"
   }
 }

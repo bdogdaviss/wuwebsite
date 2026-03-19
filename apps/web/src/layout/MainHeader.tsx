@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import { discordColors } from '@wakeup/ui'
 import { useUIStore } from '../state/uiStore'
@@ -20,6 +21,8 @@ import {
   UserPlus,
   UserCircle,
   Hash,
+  Menu,
+  Layers,
 } from 'lucide-react'
 
 const routeIcons: Record<string, React.ReactNode> = {
@@ -42,10 +45,24 @@ const friendsTabs: { key: FriendsTab; label: string }[] = [
 
 export function MainHeader() {
   const location = useLocation()
-  const { toggleInfoPanel, isInfoPanelOpen, toggleInbox, isInboxOpen, friendsTab: activeTab, setFriendsTab: setActiveTab, openCommandPalette } = useUIStore()
+  const { toggleInfoPanel, isInfoPanelOpen, toggleInbox, isInboxOpen, friendsTab: activeTab, setFriendsTab: setActiveTab, openCommandPalette, unreadCounts, openLeftPanel, openCenterPanel } = useUIStore()
   const { conversations } = useMessageStore()
   const { nestDetails } = useNestStore()
   const { user } = useAuth()
+  const [isMobile, setIsMobile] = useState(false)
+
+  // Calculate total unread count for badge
+  const totalUnreads = Object.values(unreadCounts.conversations).reduce((sum, count) => sum + count, 0) +
+    Object.values(unreadCounts.channels).reduce((sum, count) => sum + count, 0)
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   const isDmPage = location.pathname.startsWith('/dm/')
   const isNestChannel = location.pathname.startsWith('/nest/')
@@ -72,6 +89,53 @@ export function MainHeader() {
   const isFriendsPage = location.pathname === '/'
 
   if (isNestChannel && channel) {
+    if (isMobile) {
+      return (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flex: 1,
+            height: '100%',
+            padding: '0 8px',
+          }}
+        >
+          {/* Left: Menu buttons */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <HeaderAction onClick={openLeftPanel}>
+              <Layers size={20} color={discordColors.interactiveNormal} />
+            </HeaderAction>
+            <HeaderAction onClick={openCenterPanel}>
+              <Menu size={20} color={discordColors.interactiveNormal} />
+            </HeaderAction>
+          </div>
+
+          {/* Center: Channel name */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0, flex: 1, justifyContent: 'center' }}>
+            <Hash size={18} color={discordColors.interactiveNormal} />
+            <span
+              style={{
+                fontSize: 15,
+                fontWeight: 600,
+                color: discordColors.headerPrimary,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {channel.name}
+            </span>
+          </div>
+
+          {/* Right: Search */}
+          <HeaderAction onClick={openCommandPalette}>
+            <Search size={18} color={discordColors.interactiveNormal} />
+          </HeaderAction>
+        </div>
+      )
+    }
+
     return (
       <div
         style={{
@@ -104,6 +168,27 @@ export function MainHeader() {
             <HeaderAction onClick={toggleInbox}>
               <Inbox size={20} color={isInboxOpen ? discordColors.interactiveActive : discordColors.interactiveNormal} />
             </HeaderAction>
+            {totalUnreads > 0 && (
+              <div style={{
+                position: 'absolute',
+                top: 2,
+                right: 2,
+                backgroundColor: discordColors.red,
+                color: 'white',
+                borderRadius: 8,
+                padding: '0 4px',
+                fontSize: 10,
+                fontWeight: 700,
+                minWidth: 16,
+                height: 16,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                pointerEvents: 'none',
+              }}>
+                {totalUnreads > 99 ? '99+' : totalUnreads}
+              </div>
+            )}
             <InboxPanel />
           </div>
           <HeaderAction onClick={toggleInfoPanel}>
@@ -118,6 +203,48 @@ export function MainHeader() {
   }
 
   if (isDmPage && dm) {
+    if (isMobile) {
+      return (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flex: 1,
+            height: '100%',
+            padding: '0 8px',
+          }}
+        >
+          {/* Left: Menu button */}
+          <HeaderAction onClick={openCenterPanel}>
+            <Menu size={20} color={discordColors.interactiveNormal} />
+          </HeaderAction>
+
+          {/* Center: DM name */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0, flex: 1, justifyContent: 'center' }}>
+            <AtSign size={18} color={discordColors.interactiveNormal} />
+            <span
+              style={{
+                fontSize: 15,
+                fontWeight: 600,
+                color: discordColors.headerPrimary,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {dm.name}
+            </span>
+          </div>
+
+          {/* Right: Search */}
+          <HeaderAction onClick={openCommandPalette}>
+            <Search size={18} color={discordColors.interactiveNormal} />
+          </HeaderAction>
+        </div>
+      )
+    }
+
     return (
       <div
         style={{
@@ -174,10 +301,73 @@ export function MainHeader() {
             <HeaderAction onClick={toggleInbox}>
               <Inbox size={20} color={isInboxOpen ? discordColors.interactiveActive : discordColors.interactiveNormal} />
             </HeaderAction>
+            {totalUnreads > 0 && (
+              <div style={{
+                position: 'absolute',
+                top: 2,
+                right: 2,
+                backgroundColor: discordColors.red,
+                color: 'white',
+                borderRadius: 8,
+                padding: '0 4px',
+                fontSize: 10,
+                fontWeight: 700,
+                minWidth: 16,
+                height: 16,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                pointerEvents: 'none',
+              }}>
+                {totalUnreads > 99 ? '99+' : totalUnreads}
+              </div>
+            )}
             <InboxPanel />
           </div>
           <HeaderAction onClick={() => window.open('https://github.com', '_blank')}><HelpCircle size={20} color={discordColors.interactiveNormal} /></HeaderAction>
         </div>
+      </div>
+    )
+  }
+
+  if (isMobile) {
+    return (
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flex: 1,
+          height: '100%',
+          padding: '0 8px',
+        }}
+      >
+        {/* Left: Menu button */}
+        <HeaderAction onClick={openCenterPanel}>
+          <Menu size={20} color={discordColors.interactiveNormal} />
+        </HeaderAction>
+
+        {/* Center: Page title */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0, flex: 1, justifyContent: 'center' }}>
+          {currentIcon}
+          <span
+            style={{
+              fontSize: 15,
+              fontWeight: 600,
+              color: discordColors.headerPrimary,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {currentTitle}
+          </span>
+        </div>
+
+        {/* Right: Search */}
+        <HeaderAction onClick={openCommandPalette}>
+          <Search size={18} color={discordColors.interactiveNormal} />
+        </HeaderAction>
       </div>
     )
   }

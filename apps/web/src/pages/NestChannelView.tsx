@@ -9,7 +9,7 @@ import { Plus, SmilePlus, Gift, ImagePlus, Sticker, Hash } from 'lucide-react'
 
 export function NestChannelView() {
   const { nestId, channelId } = useParams<{ nestId: string; channelId: string }>()
-  const { setActiveChannel } = useUIStore()
+  const { setActiveChannel, clearUnread } = useUIStore()
   const { nestDetails } = useNestStore()
   const { channelMessages, fetchChannelMessages, sendChannelMessage } = useMessageStore()
   const { api, user } = useAuth()
@@ -21,8 +21,10 @@ export function NestChannelView() {
     if (channelId) {
       setActiveChannel(channelId)
       fetchChannelMessages(api, channelId)
+      // Clear unread count when viewing this channel
+      clearUnread('channel', channelId)
     }
-  }, [channelId, setActiveChannel, api, fetchChannelMessages])
+  }, [channelId, setActiveChannel, api, fetchChannelMessages, clearUnread])
 
   const allMessages = channelMessages[channelId || ''] || []
 

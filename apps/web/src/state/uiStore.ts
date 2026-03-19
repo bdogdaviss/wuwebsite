@@ -27,6 +27,15 @@ interface UIState {
   removedFriendIds: string[]
   userStatus: 'online' | 'idle' | 'dnd' | 'offline'
 
+  // Unread tracking
+  unreadCounts: {
+    conversations: Record<string, number>
+    channels: Record<string, number>
+  }
+
+  // Mobile panels
+  mobilePanelState: 'closed' | 'left-open' | 'center-open'
+
   setActiveNest: (id: string) => void
   setActiveChannel: (id: string | null) => void
   setActiveNavKey: (key: NavKey) => void
@@ -53,6 +62,14 @@ interface UIState {
   setBannerColor: (color: string) => void
   removeFriend: (id: string) => void
   setUserStatus: (status: 'online' | 'idle' | 'dnd' | 'offline') => void
+
+  incrementUnread: (type: 'conversation' | 'channel', id: string) => void
+  clearUnread: (type: 'conversation' | 'channel', id: string) => void
+  getTotalUnreads: () => number
+
+  openLeftPanel: () => void
+  openCenterPanel: () => void
+  closeMobilePanels: () => void
 }
 
 export const useUIStore = create<UIState>()(
@@ -79,6 +96,15 @@ export const useUIStore = create<UIState>()(
       bannerColor: '#5865f2',
       removedFriendIds: [] as string[],
       userStatus: 'online' as 'online' | 'idle' | 'dnd' | 'offline',
+
+      // Unread tracking
+      unreadCounts: {
+        conversations: {} as Record<string, number>,
+        channels: {} as Record<string, number>,
+      },
+
+      // Mobile panels
+      mobilePanelState: 'closed' as 'closed' | 'left-open' | 'center-open',
 
       setActiveNest: (id) => set({ activeNestId: id, activeChannelId: null }),
       setActiveChannel: (id) => set({ activeChannelId: id }),
@@ -132,6 +158,38 @@ export const useUIStore = create<UIState>()(
           : [...state.removedFriendIds, id],
       })),
       setUserStatus: (status) => set({ userStatus: status }),
+
+      // Unread tracking actions
+      incrementUnread: (type, id) => set((state) => ({
+        unreadCounts: {
+          ...state.unreadCounts,
+          [type === 'conversation' ? 'conversations' : 'channels']: {
+            ...(type === 'conversation' ? state.unreadCounts.conversations : state.unreadCounts.channels),
+            [id]: ((type === 'conversation' ? state.unreadCounts.conversations[id] : state.unreadCounts.channels[id]) || 0) + 1,
+          },
+        },
+      })),
+      clearUnread: (type, id) => set((state) => {
+        const key = type === 'conversation' ? 'conversations' : 'channels'
+        const { [id]: _, ...rest } = state.unreadCounts[key]
+        return {
+          unreadCounts: {
+            ...state.unreadCounts,
+            [key]: rest,
+          },
+        }
+      }),
+      getTotalUnreads: () => {
+        const state = useUIStore.getState()
+        const convCount = Object.values(state.unreadCounts.conversations).reduce((sum, count) => sum + count, 0)
+        const chanCount = Object.values(state.unreadCounts.channels).reduce((sum, count) => sum + count, 0)
+        return convCount + chanCount
+      },
+
+      // Mobile panel actions
+      openLeftPanel: () => set({ mobilePanelState: 'left-open' }),
+      openCenterPanel: () => set({ mobilePanelState: 'center-open' }),
+      closeMobilePanels: () => set({ mobilePanelState: 'closed' }),
     }),
     {
       name: 'wakeup-ui-state',
@@ -151,6 +209,7 @@ export const useUIStore = create<UIState>()(
         sidebarWidth: state.sidebarWidth,
         infoPanelWidth: state.infoPanelWidth,
         userStatus: state.userStatus,
+        unreadCounts: state.unreadCounts,
       }),
     }
   )

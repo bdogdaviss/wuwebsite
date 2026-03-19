@@ -11,6 +11,7 @@ import { DirectMessage } from './pages/DirectMessage'
 import { NestChannelView } from './pages/NestChannelView'
 import { ExtensionConnect } from './pages/ExtensionConnect'
 import { discordColors } from '@wakeup/ui'
+import { InstallPrompt } from './components/InstallPrompt'
 
 function LoadingScreen() {
   return (
@@ -118,6 +119,7 @@ function App() {
             <AppRoutes />
           </AuthProvider>
         </BrowserRouter>
+        <InstallPrompt />
       </div>
     </Theme>
   )

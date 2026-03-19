@@ -1,4 +1,5 @@
 # Wakeup Monorepo Commands
+set shell := ["C:/Program Files/Git/bin/bash.exe", "-c"]
 
 # Default command - show available commands
 default:
@@ -102,22 +103,25 @@ dev-extension:
 
 # Start everything for development (infra + api + web)
 dev: infra-up
-    #!/usr/bin/env bash
-    trap 'kill $(jobs -p)' EXIT
-    just dev-api &
-    sleep 2
-    just dev-web &
-    wait
+    cd apps/api && go run ./cmd/api & sleep 2; pnpm --filter web dev & wait
 
 # Start all services including marketing
 dev-all: infra-up
-    #!/usr/bin/env bash
-    trap 'kill $(jobs -p)' EXIT
-    just dev-api &
-    sleep 2
-    just dev-web &
-    just dev-marketing &
-    wait
+    cd apps/api && go run ./cmd/api & sleep 2; pnpm --filter web dev & pnpm --filter marketing dev & wait
+
+# === Production Commands ===
+
+# Build all for production
+prod-build:
+    pnpm --filter web build && pnpm --filter marketing build && cd apps/api && go build -o wakeup-api.exe ./cmd/api
+
+# Serve all services in production mode (run prod-build first)
+prod-all: infra-up
+    cd apps/api && ./wakeup-api.exe & sleep 2; pnpm --filter web preview --port 3000 --host & pnpm --filter marketing start -p 3002 -H 0.0.0.0 & wait
+
+# Serve without marketing
+prod: infra-up
+    cd apps/api && ./wakeup-api.exe & sleep 2; pnpm --filter web preview --port 3000 --host & wait
 
 # === Build & Quality Commands ===
 

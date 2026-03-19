@@ -18,26 +18,26 @@ const footerLinks = {
 
 export function Footer() {
   return (
-    <footer className="bg-gray-50 border-t border-gray-100">
+    <footer className="bg-gray-900 border-t border-gray-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
             <span className="text-xl font-bold text-brand-600">WakeUp</span>
-            <p className="mt-2 text-sm text-gray-600">
+            <p className="mt-2 text-sm text-gray-400">
               Focus better. Block distractions. Build better habits.
             </p>
           </div>
 
           {/* Product */}
           <div>
-            <h3 className="font-semibold text-gray-900 mb-3">Product</h3>
+            <h3 className="font-semibold text-white mb-3">Product</h3>
             <ul className="space-y-2">
               {footerLinks.product.map((link) => (
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-sm text-gray-600 hover:text-gray-900"
+                    className="text-sm text-gray-400 hover:text-white"
                   >
                     {link.label}
                   </Link>
@@ -48,13 +48,13 @@ export function Footer() {
 
           {/* Support */}
           <div>
-            <h3 className="font-semibold text-gray-900 mb-3">Support</h3>
+            <h3 className="font-semibold text-white mb-3">Support</h3>
             <ul className="space-y-2">
               {footerLinks.support.map((link) => (
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-sm text-gray-600 hover:text-gray-900"
+                    className="text-sm text-gray-400 hover:text-white"
                   >
                     {link.label}
                   </Link>
@@ -65,13 +65,13 @@ export function Footer() {
 
           {/* Legal */}
           <div>
-            <h3 className="font-semibold text-gray-900 mb-3">Legal</h3>
+            <h3 className="font-semibold text-white mb-3">Legal</h3>
             <ul className="space-y-2">
               {footerLinks.legal.map((link) => (
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-sm text-gray-600 hover:text-gray-900"
+                    className="text-sm text-gray-400 hover:text-white"
                   >
                     {link.label}
                   </Link>
@@ -81,7 +81,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-8 pt-8 border-t border-gray-200">
+        <div className="mt-8 pt-8 border-t border-gray-800">
           <p className="text-sm text-gray-500 text-center">
             &copy; {new Date().getFullYear()} WakeUp. All rights reserved.
           </p>

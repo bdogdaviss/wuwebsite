@@ -1,3 +1,6 @@
+'use client'
+
+import { Button } from 'antd'
 import { links } from '@/lib/links'
 
 interface CTAButtonsProps {
@@ -6,22 +9,37 @@ interface CTAButtonsProps {
 }
 
 export function CTAButtons({ size = 'default', className = '' }: CTAButtonsProps) {
-  const padding = size === 'large' ? 'px-8 py-4 text-lg' : 'px-6 py-3'
+  const btnSize = size === 'large' ? 'large' : 'middle'
 
   return (
-    <div className={`flex flex-col sm:flex-row gap-4 ${className}`}>
-      <a
+    <div className={`flex flex-col sm:flex-row gap-3 w-full sm:w-auto ${className}`}>
+      <Button
+        type="primary"
+        size={btnSize}
         href={links.createAccount}
-        className={`${padding} bg-brand-600 text-white font-semibold rounded-lg hover:bg-brand-700 transition-colors text-center`}
+        style={{
+          fontWeight: 600,
+          borderRadius: 10,
+          height: size === 'large' ? 48 : 40,
+          paddingInline: size === 'large' ? 32 : 24,
+          fontSize: size === 'large' ? 16 : 14,
+        }}
       >
         Get Started Free
-      </a>
-      <a
+      </Button>
+      <Button
+        size={btnSize}
         href={links.signIn}
-        className={`${padding} bg-gray-100 text-gray-700 font-semibold rounded-lg hover:bg-gray-200 transition-colors text-center`}
+        style={{
+          fontWeight: 600,
+          borderRadius: 10,
+          height: size === 'large' ? 48 : 40,
+          paddingInline: size === 'large' ? 32 : 24,
+          fontSize: size === 'large' ? 16 : 14,
+        }}
       >
         Sign In
-      </a>
+      </Button>
     </div>
   )
 }

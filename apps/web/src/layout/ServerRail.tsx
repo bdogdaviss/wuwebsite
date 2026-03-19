@@ -87,23 +87,32 @@ const BottomSection = styled(YStack, {
 })
 
 export function ServerRail() {
-  const { activeNestId, setActiveNest, setActiveChannel, openCreateGroup } = useUIStore()
+  const { activeNestId, setActiveNest, setActiveChannel, openCreateGroup, unreadCounts } = useUIStore()
   const { user, logout, api } = useAuth()
   const navigate = useNavigate()
   const { nests: apiNests, nestDetails, fetchNest } = useNestStore()
 
-  const nests = apiNests.map((n) => ({
-    id: n.id,
-    name: n.name,
-    icon: n.icon_url || '',
-    notifications: 0,
-    channels: nestDetails[n.id]?.channels?.map((ch) => ({
+  const nests = apiNests.map((n) => {
+    const channels = nestDetails[n.id]?.channels?.map((ch) => ({
       id: ch.id,
       name: ch.name,
       type: ch.type as 'text' | 'voice',
       category: ch.category,
-    })) || [],
-  }))
+    })) || []
+
+    // Calculate total unread count for this nest by summing all channel unreads
+    const notifications = channels.reduce((sum, ch) => {
+      return sum + (unreadCounts.channels[ch.id] || 0)
+    }, 0)
+
+    return {
+      id: n.id,
+      name: n.name,
+      icon: n.icon_url || '',
+      notifications,
+      channels,
+    }
+  })
 
   return (
     <RailContainer>

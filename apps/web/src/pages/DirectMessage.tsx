@@ -2,12 +2,14 @@ import { useState, useRef, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { discordColors, Avatar } from '@wakeup/ui'
 import { useMessageStore } from '../state/messageStore'
+import { useUIStore } from '../state/uiStore'
 import { useAuth } from '../context/AuthContext'
 import { Plus, SmilePlus, Gift, ImagePlus, Sticker } from 'lucide-react'
 
 export function DirectMessage() {
   const { id } = useParams<{ id: string }>()
   const { conversations, messages, fetchMessages, sendMessage } = useMessageStore()
+  const { clearUnread } = useUIStore()
   const { api, user } = useAuth()
 
   const conv = conversations.find((c) => c.id === id)
@@ -20,9 +22,11 @@ export function DirectMessage() {
   useEffect(() => {
     if (id) {
       fetchMessages(api, id)
+      // Clear unread count when viewing this conversation
+      clearUnread('conversation', id)
     }
     setInput('')
-  }, [id, api, fetchMessages])
+  }, [id, api, fetchMessages, clearUnread])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })

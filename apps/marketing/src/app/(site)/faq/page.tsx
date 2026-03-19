@@ -1,6 +1,8 @@
 import { Metadata } from 'next'
 import { Section } from '@/components/Section'
 import { CTAButtons } from '@/components/CTAButtons'
+import { FadeIn } from '@/components/FadeIn'
+import { FAQSearch } from '@/components/FAQSearch'
 import { createMetadata } from '@/lib/seo'
 
 export const metadata: Metadata = createMetadata({
@@ -87,29 +89,35 @@ export default function FAQPage() {
   return (
     <>
       <Section className="pt-24">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-            Frequently Asked Questions
-          </h1>
-          <p className="text-xl text-gray-600">
-            Everything you need to know about WakeUp.
-          </p>
-        </div>
+        <FadeIn direction="none">
+          <div className="text-center max-w-3xl mx-auto mb-20">
+            <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
+              Frequently Asked Questions
+            </h1>
+            <p className="text-xl text-gray-400 mb-8">
+              Everything you need to know about WakeUp.
+            </p>
+            <div className="flex justify-center">
+              <FAQSearch />
+            </div>
+          </div>
+        </FadeIn>
 
         <div className="max-w-3xl mx-auto space-y-12">
-          {faqs.map((section) => (
-            <div key={section.category}>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">{section.category}</h2>
+          {faqs.map((section, sIdx) => (
+            <FadeIn key={section.category} delay={0.1 * sIdx}>
+              <h2 className="text-lg font-semibold text-gray-400 uppercase tracking-wide mb-6">{section.category}</h2>
               <div className="space-y-4">
                 {section.questions.map((faq) => (
                   <details
                     key={faq.q}
-                    className="group bg-white border border-gray-200 rounded-xl overflow-hidden"
+                    className="group rounded-xl"
+                    style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}
                   >
-                    <summary className="flex items-center justify-between p-6 cursor-pointer font-semibold text-gray-900 hover:bg-gray-50">
+                    <summary className="flex items-center justify-between p-6 cursor-pointer font-semibold text-gray-200 hover:text-white" style={{ transition: 'color 0.15s' }}>
                       {faq.q}
                       <svg
-                        className="w-5 h-5 text-gray-500 group-open:rotate-180 transition-transform"
+                        className="w-5 h-5 text-gray-500 group-open:rotate-180 transition-transform flex-shrink-0 ml-4"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -117,36 +125,44 @@ export default function FAQPage() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                       </svg>
                     </summary>
-                    <div className="px-6 pb-6 text-gray-600">{faq.a}</div>
+                    <div className="faq-content">
+                      <div>
+                        <div className="px-6 pb-6 text-gray-400">{faq.a}</div>
+                      </div>
+                    </div>
                   </details>
                 ))}
               </div>
-            </div>
+            </FadeIn>
           ))}
         </div>
       </Section>
 
-      <Section className="bg-gray-50">
-        <div className="text-center max-w-2xl mx-auto">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Still have questions?</h2>
-          <p className="text-gray-600 mb-6">
-            Can&apos;t find what you&apos;re looking for? Reach out to our team.
-          </p>
-          <a
-            href="/contact"
-            className="inline-block px-6 py-3 bg-brand-600 text-white font-semibold rounded-lg hover:bg-brand-700 transition-colors"
-          >
-            Contact Support
-          </a>
-        </div>
+      <Section>
+        <FadeIn>
+          <div className="text-center max-w-2xl mx-auto">
+            <h2 className="text-2xl font-bold text-white mb-4">Still have questions?</h2>
+            <p className="text-gray-400 mb-6">
+              Can&apos;t find what you&apos;re looking for? Reach out to our team.
+            </p>
+            <a
+              href="/contact"
+              className="inline-block px-6 py-3 bg-brand-600 text-white font-semibold rounded-lg hover:bg-brand-700 transition-colors"
+            >
+              Contact Support
+            </a>
+          </div>
+        </FadeIn>
       </Section>
 
-      <Section dark>
-        <div className="text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to get started?</h2>
-          <p className="text-lg text-gray-300 mb-8">Join WakeUp today and start building better focus habits.</p>
-          <CTAButtons size="large" className="justify-center" />
-        </div>
+      <Section>
+        <FadeIn>
+          <div className="text-center">
+            <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to get started?</h2>
+            <p className="text-lg text-gray-300 mb-10">Join WakeUp today and start building better focus habits.</p>
+            <CTAButtons size="large" className="justify-center" />
+          </div>
+        </FadeIn>
       </Section>
     </>
   )
