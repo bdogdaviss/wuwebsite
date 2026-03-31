@@ -328,42 +328,104 @@ export function MainHeader() {
 
   if (isMobile) {
     return (
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flex: 1,
-          height: '100%',
-          padding: '0 8px',
-        }}
-      >
-        {/* Left: Menu button */}
-        <HeaderAction onClick={openCenterPanel}>
-          <Menu size={20} color={discordColors.interactiveNormal} />
-        </HeaderAction>
+      <div style={{ display: 'flex', flexDirection: 'column', flex: 1, height: '100%' }}>
+        {/* Top row: menu / title / search */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flex: 1,
+            minHeight: 0,
+            padding: '0 8px',
+          }}
+        >
+          {/* Left: Menu button */}
+          <HeaderAction onClick={openCenterPanel}>
+            <Menu size={20} color={discordColors.interactiveNormal} />
+          </HeaderAction>
 
-        {/* Center: Page title */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0, flex: 1, justifyContent: 'center' }}>
-          {currentIcon}
-          <span
-            style={{
-              fontSize: 15,
-              fontWeight: 600,
-              color: discordColors.headerPrimary,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {currentTitle}
-          </span>
+          {/* Center: Page title */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0, flex: 1, justifyContent: 'center' }}>
+            {currentIcon}
+            <span
+              style={{
+                fontSize: 15,
+                fontWeight: 600,
+                color: discordColors.headerPrimary,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {currentTitle}
+            </span>
+          </div>
+
+          {/* Right: Search */}
+          <HeaderAction onClick={openCommandPalette}>
+            <Search size={18} color={discordColors.interactiveNormal} />
+          </HeaderAction>
         </div>
 
-        {/* Right: Search */}
-        <HeaderAction onClick={openCommandPalette}>
-          <Search size={18} color={discordColors.interactiveNormal} />
-        </HeaderAction>
+        {/* Bottom row: Friends tabs (only on Friends page) */}
+        {isFriendsPage && (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 4,
+              padding: '0 12px 6px',
+              overflowX: 'auto',
+              WebkitOverflowScrolling: 'touch',
+              scrollbarWidth: 'none',
+            }}
+          >
+            {friendsTabs.map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                style={{
+                  background:
+                    activeTab === tab.key
+                      ? discordColors.bgModifierSelected
+                      : 'transparent',
+                  border: 'none',
+                  borderRadius: 4,
+                  padding: '4px 10px',
+                  fontSize: 13,
+                  fontWeight: 500,
+                  color:
+                    activeTab === tab.key
+                      ? discordColors.interactiveActive
+                      : discordColors.interactiveNormal,
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0,
+                }}
+              >
+                {tab.label}
+              </button>
+            ))}
+            <button
+              onClick={() => setActiveTab('add')}
+              style={{
+                background: activeTab === 'add' ? 'transparent' : discordColors.green,
+                border: 'none',
+                borderRadius: 4,
+                padding: '4px 10px',
+                fontSize: 13,
+                fontWeight: 500,
+                color: activeTab === 'add' ? discordColors.green : '#ffffff',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
+              }}
+            >
+              Add Friend
+            </button>
+          </div>
+        )}
       </div>
     )
   }

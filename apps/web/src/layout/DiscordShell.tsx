@@ -246,7 +246,7 @@ export function DiscordShell() {
                       "main"
                       "bottomnav"
                     `,
-                    gridTemplateRows: `calc(${discordLayout.headerHeight}px + env(safe-area-inset-top)) 1fr calc(68px + env(safe-area-inset-bottom))`,
+                    gridTemplateRows: `auto 1fr calc(68px + env(safe-area-inset-bottom))`,
                     gridTemplateColumns: '1fr',
                     height: '100%',
                     width: '100%',
@@ -259,8 +259,8 @@ export function DiscordShell() {
                       minHeight: discordLayout.headerHeight,
                       boxShadow: '0 1px 0 rgba(4,4,5,0.2), 0 1.5px 0 rgba(6,6,7,0.05)',
                       display: 'flex',
-                      alignItems: 'center',
-                      padding: '0 8px',
+                      alignItems: 'stretch',
+                      padding: '0',
                       paddingTop: 'env(safe-area-inset-top)',
                       zIndex: 1,
                     }}
