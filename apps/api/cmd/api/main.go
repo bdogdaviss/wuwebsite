@@ -151,23 +151,23 @@ func main() {
 
 			// Friends
 			friendshipHandler := handler.NewFriendshipHandler(db, hub)
+			// Status
+			statusHandler := handler.NewStatusHandler(db, hub)
+			r.Patch("/me/status", statusHandler.UpdateStatus)
+
 			r.Route("/friends", func(r chi.Router) {
 				r.Get("/", friendshipHandler.ListFriends)
 				r.Get("/pending", friendshipHandler.ListPending)
+				r.Get("/online", statusHandler.GetOnlineFriends)
 				r.Post("/request", friendshipHandler.SendRequest)
 				r.Post("/{id}/accept", friendshipHandler.AcceptRequest)
 				r.Post("/{id}/reject", friendshipHandler.RejectRequest)
 				r.Delete("/{id}", friendshipHandler.RemoveFriend)
 			})
 
-			// Status
-			statusHandler := handler.NewStatusHandler(db, hub)
-			r.Patch("/me/status", statusHandler.UpdateStatus)
-			r.Get("/friends/online", statusHandler.GetOnlineFriends)
-
 			// Conversations (DMs and groups)
 			conversationHandler := handler.NewConversationHandler(db)
-			messageHandler := handler.NewMessageHandler(db)
+			messageHandler := handler.NewMessageHandler(db, hub)
 			r.Route("/conversations", func(r chi.Router) {
 				r.Get("/", conversationHandler.List)
 				r.Post("/", conversationHandler.CreateDM)

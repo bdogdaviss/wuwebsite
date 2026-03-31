@@ -7,6 +7,7 @@ import (
 
 	"wakeup/api/internal/middleware"
 	"wakeup/api/internal/model"
+	"wakeup/api/internal/ws"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -14,11 +15,12 @@ import (
 )
 
 type MessageHandler struct {
-	db *pgxpool.Pool
+	db  *pgxpool.Pool
+	hub *ws.Hub
 }
 
-func NewMessageHandler(db *pgxpool.Pool) *MessageHandler {
-	return &MessageHandler{db: db}
+func NewMessageHandler(db *pgxpool.Pool, hub *ws.Hub) *MessageHandler {
+	return &MessageHandler{db: db, hub: hub}
 }
 
 // SendMessage sends a message to a DM/group conversation
@@ -82,6 +84,30 @@ func (h *MessageHandler) SendMessage(w http.ResponseWriter, r *http.Request) {
 	if err == nil {
 		ResolveAvatarURL(r, &sender)
 		msg.Sender = &sender
+	}
+
+	// Broadcast to all conversation members via WebSocket
+	if h.hub != nil {
+		rows, err := h.db.Query(r.Context(),
+			`SELECT user_id FROM conversation_members WHERE conversation_id = $1`,
+			convID,
+		)
+		if err == nil {
+			var memberIDs []uuid.UUID
+			for rows.Next() {
+				var uid uuid.UUID
+				if rows.Scan(&uid) == nil {
+					memberIDs = append(memberIDs, uid)
+				}
+			}
+			rows.Close()
+			if len(memberIDs) > 0 {
+				h.hub.Broadcast(memberIDs, ws.Event{
+					Type: "message.new",
+					Data: msg,
+				})
+			}
+		}
 	}
 
 	writeJSON(w, http.StatusCreated, msg)
@@ -230,6 +256,32 @@ func (h *MessageHandler) SendChannelMessage(w http.ResponseWriter, r *http.Reque
 	if err == nil {
 		ResolveAvatarURL(r, &sender)
 		msg.Sender = &sender
+	}
+
+	// Broadcast to all nest members via WebSocket
+	if h.hub != nil {
+		rows, err := h.db.Query(r.Context(),
+			`SELECT nm.user_id FROM nest_members nm
+			 JOIN nest_channels nc ON nc.nest_id = nm.nest_id
+			 WHERE nc.id = $1`,
+			channelID,
+		)
+		if err == nil {
+			var memberIDs []uuid.UUID
+			for rows.Next() {
+				var uid uuid.UUID
+				if rows.Scan(&uid) == nil {
+					memberIDs = append(memberIDs, uid)
+				}
+			}
+			rows.Close()
+			if len(memberIDs) > 0 {
+				h.hub.Broadcast(memberIDs, ws.Event{
+					Type: "channel_message.new",
+					Data: msg,
+				})
+			}
+		}
 	}
 
 	writeJSON(w, http.StatusCreated, msg)
