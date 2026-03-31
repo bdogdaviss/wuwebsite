@@ -436,7 +436,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
   return (
     <Overlay
       onPress={onClose}
-      paddingTop={isMobile ? 12 : 60}
+      paddingTop={isMobile ? 32 : 60}
       paddingBottom={isMobile ? 12 : 0}
     >
       <PaletteContainer

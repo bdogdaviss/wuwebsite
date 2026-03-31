@@ -128,6 +128,7 @@ export function MobilePanels({ leftPanel, centerPanel, rightPanel }: MobilePanel
           left: 0,
           top: 0,
           bottom: 0,
+          paddingTop: 'calc(env(safe-area-inset-top, 0px) + 14px)',
           width: CENTER_PANEL_WIDTH,
           backgroundColor: discordColors.bgSecondary,
           transform: leftPanelSpring.x.to((x) => {

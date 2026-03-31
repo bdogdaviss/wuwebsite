@@ -39,7 +39,7 @@ export function MobileServerRail() {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        padding: '8px 0',
+        padding: 'calc(env(safe-area-inset-top, 0px) + 14px) 0 8px',
         gap: 2,
         height: '100%',
         width: 72,
