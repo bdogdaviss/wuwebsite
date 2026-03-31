@@ -13,6 +13,7 @@ import {
   MessageCircle,
   AtSign,
   Hash,
+  X,
 } from 'lucide-react'
 
 const tabs = [
@@ -56,29 +57,36 @@ export function InboxPanel() {
         style={{
           position: 'fixed',
           inset: 0,
-          zIndex: 99,
+          backgroundColor: 'rgba(0,0,0,0.6)',
+          zIndex: 199,
         }}
       />
 
       {/* Panel */}
       <div
         style={{
-          position: isMobile ? 'fixed' : 'absolute',
-          top: isMobile ? 0 : 4,
-          right: 0,
-          left: isMobile ? 0 : undefined,
-          bottom: isMobile ? 0 : undefined,
-          width: isMobile ? '100%' : 480,
-          maxHeight: isMobile ? 'none' : 'calc(var(--app-vh) - 80px)',
+          position: 'fixed',
+          ...(isMobile
+            ? {
+                left: 8,
+                right: 8,
+                bottom: 'calc(76px + env(safe-area-inset-bottom, 0px))',
+                maxHeight: 'calc(var(--app-vh, 100dvh) - 140px)',
+                borderRadius: 12,
+              }
+            : {
+                top: 4,
+                right: 0,
+                width: 480,
+                maxHeight: 'calc(var(--app-vh) - 80px)',
+                borderRadius: 8,
+              }),
           backgroundColor: discordColors.bgTertiary,
-          borderRadius: isMobile ? 0 : 8,
           boxShadow: '0 8px 16px rgba(0,0,0,0.24)',
-          zIndex: 100,
+          zIndex: 200,
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',
-          paddingTop: isMobile ? 'env(safe-area-inset-top)' : undefined,
-          paddingBottom: isMobile ? 'env(safe-area-inset-bottom)' : undefined,
         }}
       >
         {/* Header */}
@@ -87,7 +95,7 @@ export function InboxPanel() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            padding: '16px 16px 0',
+            padding: '12px 16px 0',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -142,6 +150,25 @@ export function InboxPanel() {
                 </span>
               )}
             </div>
+            {/* Close button (mobile) */}
+            {isMobile && (
+              <div
+                onClick={toggleInbox}
+                style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: 14,
+                  backgroundColor: discordColors.bgModifierActive,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  marginLeft: 4,
+                }}
+              >
+                <X size={16} color={discordColors.interactiveNormal} />
+              </div>
+            )}
           </div>
         </div>
 

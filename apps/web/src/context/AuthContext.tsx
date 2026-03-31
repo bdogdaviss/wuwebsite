@@ -7,6 +7,16 @@ import { useUIStore } from '../state/uiStore'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 const WS_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8080').replace('http', 'ws') + '/ws'
+const DEV_MOCK = import.meta.env.VITE_DEV_MOCK === 'true'
+
+const MOCK_USER: User = {
+  id: 'dev-mock-user-001',
+  email: 'dev@wakeup.test',
+  display_name: 'Dev Tester',
+  avatar_url: null,
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+}
 
 interface AuthState {
   user: User | null
@@ -28,12 +38,18 @@ const TOKEN_KEY = 'wakeup_access_token'
 const REFRESH_KEY = 'wakeup_refresh_token'
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const [user, setUser] = useState<User | null>(DEV_MOCK ? MOCK_USER : null)
+  const [isLoading, setIsLoading] = useState(DEV_MOCK ? false : true)
   const [api] = useState(() => createApiClient(API_URL))
   const wsRef = useRef<WakeupSocket | null>(null)
 
+  // In dev mock mode, mark YouWake as completed so we skip that screen
+  if (DEV_MOCK && typeof sessionStorage !== 'undefined') {
+    sessionStorage.setItem('wakeup-you-wake-done', '1')
+  }
+
   const initSocialData = useCallback(async () => {
+    if (DEV_MOCK) return // Skip API calls in mock mode
     const { fetchFriends, fetchPending, fetchOnlineFriends } = useSocialStore.getState()
     const { fetchConversations } = useMessageStore.getState()
     const { fetchNests } = useNestStore.getState()
@@ -113,6 +129,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const loadUser = useCallback(async () => {
+    if (DEV_MOCK) return // Already set mock user in state init
+
     const accessToken = localStorage.getItem(TOKEN_KEY)
     if (!accessToken) {
       setIsLoading(false)

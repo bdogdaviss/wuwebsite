@@ -10,6 +10,7 @@ import { MobileBottomNav } from './MobileBottomNav'
 import { MobilePanels } from './MobilePanels'
 import { MobileServerRail } from './MobileServerRail'
 import { CommandPalette } from '../components/CommandPalette'
+import { InboxPanel } from '../components/InboxPanel'
 import { SettingsOverlay } from '../pages/Settings'
 import { CreateGroupDm } from '../components/CreateGroupDm'
 import { useUIStore } from '../state/uiStore'
@@ -359,6 +360,8 @@ export function DiscordShell() {
         isOpen={isCommandPaletteOpen}
         onClose={closeCommandPalette}
       />
+
+      {isMobile && <InboxPanel />}
 
       <SettingsOverlay />
       <CreateGroupDm />

@@ -597,14 +597,15 @@ function MyAccountSection({
           )}
         </div>
 
-        {/* Avatar + Edit button row */}
+        {/* Avatar + name + Edit button */}
         <div
           style={{
             display: 'flex',
-            alignItems: 'flex-end',
-            justifyContent: 'space-between',
+            flexDirection: 'column',
+            alignItems: 'center',
             padding: '0 16px',
             marginTop: -40,
+            gap: 8,
           }}
         >
           <div
@@ -615,6 +616,7 @@ function MyAccountSection({
               border: `6px solid ${discordColors.bgTertiary}`,
               cursor: 'pointer',
               overflow: 'hidden',
+              flexShrink: 0,
             }}
           >
             <Avatar
@@ -670,7 +672,8 @@ function MyAccountSection({
               fontSize: 20,
               fontWeight: 600,
               color: discordColors.headerPrimary,
-              marginBottom: 16,
+              textAlign: 'center',
+              wordBreak: 'break-word',
             }}
           >
             {user?.display_name}
@@ -682,12 +685,11 @@ function MyAccountSection({
               background: discordColors.brandPrimary,
               border: 'none',
               borderRadius: 3,
-              padding: '4px 16px',
+              padding: '6px 20px',
               fontSize: 14,
               fontWeight: 500,
               color: '#ffffff',
               cursor: 'pointer',
-              marginBottom: 16,
             }}
           >
             Edit User Profile

@@ -10,8 +10,8 @@ interface MobilePanelsProps {
   rightPanel: ReactNode
 }
 
-const LEFT_PANEL_WIDTH = 280
-const CENTER_PANEL_WIDTH = 280
+const LEFT_PANEL_WIDTH = 72
+const CENTER_PANEL_WIDTH = 260
 
 export function MobilePanels({ leftPanel, centerPanel, rightPanel }: MobilePanelsProps) {
   const { mobilePanelState, closeMobilePanels, openCenterPanel } = useUIStore()

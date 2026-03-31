@@ -38,13 +38,16 @@ const Overlay = styled(YStack, {
   bottom: 0,
   backgroundColor: 'rgba(0, 0, 0, 0.5)',
   alignItems: 'center',
-  paddingTop: 100,
+  justifyContent: 'flex-start',
+  paddingTop: 60,
+  paddingHorizontal: 16,
   zIndex: 1000,
 })
 
 const PaletteContainer = styled(YStack, {
-  width: 600,
-  maxHeight: 500,
+  width: '100%',
+  maxWidth: 600,
+  maxHeight: 'calc(var(--app-vh, 100dvh) - 120px)',
   backgroundColor: '$background',
   borderRadius: '$4',
   overflow: 'hidden',
@@ -94,6 +97,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
   const [query, setQuery] = useState('')
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [recentCommandIds, setRecentCommandIds] = useState<string[]>([])
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
   const inputRef = useRef<HTMLInputElement>(null)
   const navigate = useNavigate()
   const { api, user } = useAuth()
@@ -410,6 +414,12 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
   }, [handleKeyDown])
 
   useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth <= 768)
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
+  useEffect(() => {
     if (isOpen) {
       setQuery('')
       setSelectedIndex(0)
@@ -424,8 +434,16 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
   if (!isOpen) return null
 
   return (
-    <Overlay onPress={onClose}>
-      <PaletteContainer onPress={(e: React.MouseEvent) => e.stopPropagation()}>
+    <Overlay
+      onPress={onClose}
+      paddingTop={isMobile ? 12 : 60}
+      paddingBottom={isMobile ? 12 : 0}
+    >
+      <PaletteContainer
+        onPress={(e: React.MouseEvent) => e.stopPropagation()}
+        maxHeight={isMobile ? 'calc(var(--app-vh, 100dvh) - 24px)' : 'calc(var(--app-vh, 100dvh) - 120px)'}
+        borderRadius={isMobile ? 12 : 16}
+      >
         <XStack
           paddingHorizontal="$4"
           paddingVertical="$3"
@@ -435,7 +453,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
           <Input
             ref={inputRef as any}
             flex={1}
-            placeholder="Search channels, DMs, users, or commands..."
+            placeholder="Search..."
             value={query}
             onChangeText={setQuery}
             borderWidth={0}
@@ -444,7 +462,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
           />
         </XStack>
 
-        <ScrollView maxHeight={380}>
+        <ScrollView flex={1} maxHeight="100%">
           <YStack paddingVertical="$2">
             {flatResults.length === 0 ? (
               <Text color="$gray11" padding="$4" textAlign="center">
@@ -481,30 +499,32 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
           </YStack>
         </ScrollView>
 
-        <XStack
-          paddingHorizontal="$4"
-          paddingVertical="$2"
-          borderTopWidth={1}
-          borderTopColor="$gray6"
-          gap="$4"
-          alignItems="center"
-        >
-          <XStack alignItems="center" gap="$2">
-            <Clock size={12} />
+        {!isMobile && (
+          <XStack
+            paddingHorizontal="$4"
+            paddingVertical="$2"
+            borderTopWidth={1}
+            borderTopColor="$gray6"
+            gap="$4"
+            alignItems="center"
+          >
+            <XStack alignItems="center" gap="$2">
+              <Clock size={12} />
+              <Text fontSize="$1" color="$gray10">
+                {flatResults.length} results
+              </Text>
+            </XStack>
             <Text fontSize="$1" color="$gray10">
-              {flatResults.length} results
+              <Text fontFamily="$mono">{'\u2191\u2193'}</Text> navigate
+            </Text>
+            <Text fontSize="$1" color="$gray10">
+              <Text fontFamily="$mono">{'\u21B5'}</Text> select
+            </Text>
+            <Text fontSize="$1" color="$gray10">
+              <Text fontFamily="$mono">esc</Text> close
             </Text>
           </XStack>
-          <Text fontSize="$1" color="$gray10">
-            <Text fontFamily="$mono">{'\u2191\u2193'}</Text> navigate
-          </Text>
-          <Text fontSize="$1" color="$gray10">
-            <Text fontFamily="$mono">{'\u21B5'}</Text> select
-          </Text>
-          <Text fontSize="$1" color="$gray10">
-            <Text fontFamily="$mono">esc</Text> close
-          </Text>
-        </XStack>
+        )}
       </PaletteContainer>
     </Overlay>
   )
