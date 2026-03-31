@@ -86,11 +86,11 @@ func (h *MessageHandler) SendMessage(w http.ResponseWriter, r *http.Request) {
 		msg.Sender = &sender
 	}
 
-	// Broadcast to all conversation members via WebSocket
+	// Broadcast to other conversation members via WebSocket (exclude sender)
 	if h.hub != nil {
 		rows, err := h.db.Query(r.Context(),
-			`SELECT user_id FROM conversation_members WHERE conversation_id = $1`,
-			convID,
+			`SELECT user_id FROM conversation_members WHERE conversation_id = $1 AND user_id != $2`,
+			convID, userID,
 		)
 		if err == nil {
 			var memberIDs []uuid.UUID
@@ -258,13 +258,13 @@ func (h *MessageHandler) SendChannelMessage(w http.ResponseWriter, r *http.Reque
 		msg.Sender = &sender
 	}
 
-	// Broadcast to all nest members via WebSocket
+	// Broadcast to other nest members via WebSocket (exclude sender)
 	if h.hub != nil {
 		rows, err := h.db.Query(r.Context(),
 			`SELECT nm.user_id FROM nest_members nm
 			 JOIN nest_channels nc ON nc.nest_id = nm.nest_id
-			 WHERE nc.id = $1`,
-			channelID,
+			 WHERE nc.id = $1 AND nm.user_id != $2`,
+			channelID, userID,
 		)
 		if err == nil {
 			var memberIDs []uuid.UUID
