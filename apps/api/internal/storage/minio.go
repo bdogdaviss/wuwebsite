@@ -27,20 +27,6 @@ func NewMinioClient(cfg *config.Config) (*MinioClient, error) {
 		return nil, fmt.Errorf("failed to create minio client: %w", err)
 	}
 
-	// Ensure bucket exists
-	ctx := context.Background()
-	exists, err := client.BucketExists(ctx, cfg.MinioBucket)
-	if err != nil {
-		return nil, fmt.Errorf("failed to check bucket: %w", err)
-	}
-
-	if !exists {
-		err = client.MakeBucket(ctx, cfg.MinioBucket, minio.MakeBucketOptions{})
-		if err != nil {
-			return nil, fmt.Errorf("failed to create bucket: %w", err)
-		}
-	}
-
 	return &MinioClient{
 		client: client,
 		bucket: cfg.MinioBucket,

@@ -18,7 +18,7 @@ func ResolveAvatarURL(r *http.Request, profile *model.Profile) {
 	// If it looks like an object key (contains "/") and isn't already a full URL, build a proxy URL
 	if strings.Contains(*profile.AvatarURL, "/") && !strings.HasPrefix(*profile.AvatarURL, "http") {
 		scheme := "http"
-		if r.TLS != nil {
+		if r.TLS != nil || r.Header.Get("X-Forwarded-Proto") == "https" {
 			scheme = "https"
 		}
 		avatarURL := fmt.Sprintf("%s://%s/files/avatar?key=%s", scheme, r.Host, url.QueryEscape(*profile.AvatarURL))
