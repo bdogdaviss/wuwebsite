@@ -4,7 +4,7 @@ import { discordColors, Avatar } from '@wakeup/ui'
 import { useMessageStore } from '../state/messageStore'
 import { useUIStore } from '../state/uiStore'
 import { useAuth } from '../context/AuthContext'
-import { Plus, SmilePlus, Gift, ImagePlus, Sticker } from 'lucide-react'
+import { Plus, SmilePlus, Gift, ImagePlus, Sticker, SendHorizontal, ChevronRight } from 'lucide-react'
 
 export function DirectMessage() {
   const { id } = useParams<{ id: string }>()
@@ -16,7 +16,14 @@ export function DirectMessage() {
   const convMessages = messages[id || ''] || []
 
   const [input, setInput] = useState('')
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
   const bottomRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 768)
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
 
   // Fetch messages when conversation changes
   useEffect(() => {
@@ -203,30 +210,35 @@ export function DirectMessage() {
       </div>
 
       {/* Message input */}
-      <div style={{ padding: '0 16px 24px' }}>
+      <div style={{ padding: isMobile ? '0 8px 8px' : '0 16px 24px', flexShrink: 0 }}>
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
             backgroundColor: discordColors.searchBg,
-            borderRadius: 8,
-            padding: '0 16px',
+            borderRadius: isMobile ? 24 : 8,
+            padding: isMobile ? '0 4px 0 12px' : '0 16px',
+            gap: isMobile ? 4 : 0,
           }}
         >
+          {/* Expand / Plus button */}
           <div
             style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
-              padding: '12px 4px',
-              marginRight: 4,
-              minWidth: 44,
-              minHeight: 44,
+              flexShrink: 0,
+              minWidth: isMobile ? 32 : 44,
+              minHeight: isMobile ? 32 : 44,
+              padding: isMobile ? 4 : '12px 4px',
+              marginRight: isMobile ? 0 : 4,
             }}
           >
-            <Plus size={20} color={discordColors.interactiveNormal} />
+            <ChevronRight size={isMobile ? 22 : 20} color={discordColors.interactiveNormal} />
           </div>
+
+          {/* Text input */}
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -241,15 +253,55 @@ export function DirectMessage() {
               outline: 'none',
               color: discordColors.textNormal,
               fontSize: 16,
-              padding: '14px 8px',
-              minHeight: 48,
+              padding: isMobile ? '10px 4px' : '14px 8px',
+              minHeight: isMobile ? 44 : 48,
+              minWidth: 0,
             }}
           />
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <Gift size={20} color={discordColors.interactiveNormal} style={{ cursor: 'pointer' }} />
-            <ImagePlus size={20} color={discordColors.interactiveNormal} style={{ cursor: 'pointer' }} />
-            <Sticker size={20} color={discordColors.interactiveNormal} style={{ cursor: 'pointer' }} />
-            <SmilePlus size={20} color={discordColors.interactiveNormal} style={{ cursor: 'pointer' }} />
+
+          {/* Right side icons */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? 4 : 12, flexShrink: 0 }}>
+            {!isMobile && (
+              <>
+                <Gift size={20} color={discordColors.interactiveNormal} style={{ cursor: 'pointer' }} />
+                <ImagePlus size={20} color={discordColors.interactiveNormal} style={{ cursor: 'pointer' }} />
+                <Sticker size={20} color={discordColors.interactiveNormal} style={{ cursor: 'pointer' }} />
+              </>
+            )}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                padding: 6,
+              }}
+            >
+              <SmilePlus size={isMobile ? 22 : 20} color={discordColors.interactiveNormal} />
+            </div>
+
+            {/* Send button */}
+            <div
+              onClick={handleSend}
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 18,
+                backgroundColor: input.trim() ? '#5865f2' : 'transparent',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: input.trim() ? 'pointer' : 'default',
+                transition: 'background-color 0.15s',
+                flexShrink: 0,
+                marginRight: isMobile ? 2 : 0,
+              }}
+            >
+              <SendHorizontal
+                size={20}
+                color={input.trim() ? '#ffffff' : discordColors.interactiveNormal}
+              />
+            </div>
           </div>
         </div>
       </div>
