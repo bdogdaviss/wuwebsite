@@ -6,7 +6,7 @@ import { useMessageStore } from '../state/messageStore'
 import { useSocialStore } from '../state/socialStore'
 import { discordColors, UserStatusPanel, StatusDot } from '@wakeup/ui'
 import { Users, Compass, Moon, Plus, Search, X, Mic, MicOff, Headphones, HeadphoneOff, Settings, MessageSquare, Sparkles, ShoppingBag, Swords, Hash, Volume2, ChevronDown, ChevronRight } from 'lucide-react'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { Circle, MinusCircle } from 'lucide-react'
 
 const iconMap: Record<string, React.ReactNode> = {
@@ -118,12 +118,13 @@ const navItems = [
 function HomeSidebar() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { setActiveNavKey, openSettings, openCommandPalette, openCreateGroup, toggleMute, toggleDeafen, isMuted, isDeafened, hideDm, hiddenDmIds, userStatus, unreadCounts } = useUIStore()
+  const { setActiveNavKey, openSettings, openCommandPalette, openCreateGroup, toggleMute, toggleDeafen, isMuted, isDeafened, hideDm, hiddenDmIds, userStatus, unreadCounts, closeMobilePanels } = useUIStore()
   const { user } = useAuth()
   const { conversations } = useMessageStore()
   const { onlineFriends } = useSocialStore()
   const [showStatusPicker, setShowStatusPicker] = useState(false)
   const statusPanelRef = useRef<HTMLDivElement>(null)
+  const isMobile = useMemo(() => window.innerWidth <= 768, [])
 
   // Map API conversations to DM display items
   const allDms = conversations.map((conv) => {
@@ -156,11 +157,11 @@ function HomeSidebar() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* Search bar */}
-      <div style={{ padding: '0 8px', height: 48, display: 'flex', alignItems: 'center' }}>
+      <div style={{ padding: '0 8px', height: 48, display: 'flex', alignItems: 'center', gap: 6 }}>
         <div
           onClick={openCommandPalette}
           style={{
-            width: '100%',
+            flex: 1,
             height: 28,
             backgroundColor: discordColors.searchBg,
             borderRadius: 4,
@@ -175,12 +176,29 @@ function HomeSidebar() {
           </span>
           <Search size={14} color={discordColors.textMuted} />
         </div>
+        {isMobile && (
+          <div
+            onClick={closeMobilePanels}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 28,
+              height: 28,
+              borderRadius: 4,
+              cursor: 'pointer',
+              flexShrink: 0,
+            }}
+          >
+            <X size={18} color={discordColors.textMuted} />
+          </div>
+        )}
       </div>
 
       {/* Scrollable content */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '0 8px' }}>
         {/* Nav items */}
-        <div style={{ marginTop: 8 }}>
+        <div style={{ marginTop: 4 }}>
           {navItems.map((item) => {
             const active = isActive(item.route)
             return (
@@ -231,7 +249,7 @@ function HomeSidebar() {
           style={{
             height: 1,
             backgroundColor: discordColors.border,
-            margin: '8px 12px',
+            margin: '4px 12px',
           }}
         />
 
@@ -278,7 +296,7 @@ function HomeSidebar() {
           style={{
             height: 1,
             backgroundColor: discordColors.border,
-            margin: '8px 12px',
+            margin: '4px 12px',
           }}
         />
 
@@ -288,7 +306,7 @@ function HomeSidebar() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            padding: '16px 12px 4px',
+            padding: '8px 12px 4px',
           }}
         >
           <span
