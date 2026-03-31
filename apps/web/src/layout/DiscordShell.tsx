@@ -262,7 +262,7 @@ export function DiscordShell() {
                       display: 'flex',
                       alignItems: 'stretch',
                       padding: '0',
-                      paddingTop: 'env(safe-area-inset-top)',
+                      paddingTop: 'calc(env(safe-area-inset-top) + 14px)',
                       zIndex: 1,
                     }}
                   >
