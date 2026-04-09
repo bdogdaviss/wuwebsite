@@ -1,15 +1,19 @@
 import { useEffect, useState, useCallback } from 'react'
-import { FlatList, RefreshControl, Pressable, SectionList } from 'react-native'
-import { YStack, XStack, Text, Spinner, Stack } from 'tamagui'
+import { RefreshControl, Pressable, SectionList } from 'react-native'
+import { YStack, XStack, Text } from 'tamagui'
 import { useAuth } from '../../src/auth/AuthContext'
 import type { Conversation, Nest } from '@wakeup/api-client'
 import { api } from '../../src/api/client'
 import { discordColors } from '../../src/theme/colors'
 import { useRouter } from 'expo-router'
+import { MobileAvatar, LoadingState, EmptyState, SectionHeader } from '../../src/components'
+import { useResponsive } from '../../src/hooks/useResponsive'
+import FontAwesome from '@expo/vector-icons/FontAwesome'
 
 export default function MessagesScreen() {
   const { user } = useAuth()
   const router = useRouter()
+  const { px } = useResponsive()
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [nests, setNests] = useState<Nest[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -26,36 +30,22 @@ export default function MessagesScreen() {
     setIsRefreshing(false)
   }, [])
 
-  useEffect(() => {
-    loadData()
-  }, [loadData])
+  useEffect(() => { loadData() }, [loadData])
 
-  const handleRefresh = () => {
-    setIsRefreshing(true)
-    loadData()
-  }
+  const handleRefresh = () => { setIsRefreshing(true); loadData() }
 
-  const getConversationName = (conv: Conversation): string => {
+  const getConvName = (conv: Conversation) => {
     if (conv.name) return conv.name
-    if (conv.members) {
-      const others = conv.members.filter((m) => m.id !== user?.id)
-      if (others.length > 0) return others.map((m) => m.display_name).join(', ')
-    }
-    return 'Conversation'
+    const others = conv.members?.filter((m) => m.id !== user?.id) || []
+    return others.map((m) => m.display_name).join(', ') || 'Conversation'
   }
 
-  const getConversationInitial = (conv: Conversation): string => {
-    const name = getConversationName(conv)
-    return name.charAt(0).toUpperCase()
+  const getConvAvatar = (conv: Conversation) => {
+    const others = conv.members?.filter((m) => m.id !== user?.id) || []
+    return others[0]?.avatar_url || undefined
   }
 
-  if (isLoading) {
-    return (
-      <YStack flex={1} alignItems="center" justifyContent="center" backgroundColor={discordColors.bgPrimary}>
-        <Spinner size="large" color={discordColors.brandPrimary} />
-      </YStack>
-    )
-  }
+  if (isLoading) return <LoadingState />
 
   const sections = [
     ...(conversations.length > 0 ? [{ title: 'Direct Messages', data: conversations.map((c) => ({ type: 'dm' as const, item: c })) }] : []),
@@ -69,93 +59,49 @@ export default function MessagesScreen() {
         keyExtractor={(item) => item.item.id}
         refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} tintColor={discordColors.textMuted} />}
         renderSectionHeader={({ section }) => (
-          <YStack backgroundColor={discordColors.bgPrimary} paddingHorizontal={16} paddingTop={16} paddingBottom={8}>
-            <Text
-              fontSize={12}
-              fontWeight="700"
-              color={discordColors.textMuted}
-              textTransform="uppercase"
-              letterSpacing={0.5}
-            >
-              {section.title}
-            </Text>
-          </YStack>
+          <SectionHeader title={section.title} paddingHorizontal={px} />
         )}
         renderItem={({ item: entry }) => {
           if (entry.type === 'dm') {
             const conv = entry.item as Conversation
-            const name = getConversationName(conv)
-            const initial = getConversationInitial(conv)
+            const name = getConvName(conv)
             const isGroup = conv.type === 'group'
             return (
               <Pressable onPress={() => router.push(`/dm/${conv.id}`)}>
-                <XStack
-                  paddingHorizontal={16}
-                  paddingVertical={12}
-                  alignItems="center"
-                  gap={12}
-                  borderBottomWidth={1}
-                  borderBottomColor={discordColors.border}
-                >
-                  <Stack
-                    width={40}
-                    height={40}
-                    borderRadius={20}
-                    backgroundColor={isGroup ? discordColors.green : discordColors.brandPrimary}
-                    alignItems="center"
-                    justifyContent="center"
-                  >
-                    <Text fontSize={16} color="white" fontWeight="600">{initial}</Text>
-                  </Stack>
+                <XStack paddingHorizontal={px} paddingVertical={12} alignItems="center" gap={12} borderBottomWidth={1} borderBottomColor={discordColors.border}>
+                  <MobileAvatar src={getConvAvatar(conv)} fallback={name} size="md" />
                   <YStack flex={1}>
-                    <Text fontSize={15} fontWeight="600" color={discordColors.textNormal}>{name}</Text>
+                    <Text fontSize={15} fontWeight="600" color={discordColors.textNormal} numberOfLines={1}>{name}</Text>
                     <Text fontSize={13} color={discordColors.textMuted}>
                       {isGroup ? `${conv.members?.length || 0} members` : 'Direct Message'}
                     </Text>
                   </YStack>
+                  <FontAwesome name="chevron-right" size={12} color={discordColors.textMuted} />
                 </XStack>
               </Pressable>
             )
           }
 
-          // Nest item
           const nest = entry.item as Nest
           return (
             <Pressable onPress={() => router.push(`/nest/${nest.id}`)}>
-              <XStack
-                paddingHorizontal={16}
-                paddingVertical={12}
-                alignItems="center"
-                gap={12}
-                borderBottomWidth={1}
-                borderBottomColor={discordColors.border}
-              >
-                <Stack
-                  width={40}
-                  height={40}
-                  borderRadius={12}
-                  backgroundColor={discordColors.brandPrimary}
-                  alignItems="center"
-                  justifyContent="center"
-                >
-                  <Text fontSize={16} color="white" fontWeight="700">{nest.name.charAt(0).toUpperCase()}</Text>
-                </Stack>
+              <XStack paddingHorizontal={px} paddingVertical={12} alignItems="center" gap={12} borderBottomWidth={1} borderBottomColor={discordColors.border}>
+                <MobileAvatar fallback={nest.name} size="md" />
                 <YStack flex={1}>
-                  <Text fontSize={15} fontWeight="600" color={discordColors.textNormal}>{nest.name}</Text>
+                  <Text fontSize={15} fontWeight="600" color={discordColors.textNormal} numberOfLines={1}>{nest.name}</Text>
                   <Text fontSize={13} color={discordColors.textMuted}>Nest</Text>
                 </YStack>
+                <FontAwesome name="chevron-right" size={12} color={discordColors.textMuted} />
               </XStack>
             </Pressable>
           )
         }}
         ListEmptyComponent={
-          <YStack alignItems="center" padding={48} gap={12}>
-            <Text fontSize={48}>💬</Text>
-            <Text fontSize={16} fontWeight="500" color={discordColors.textNormal}>No messages yet</Text>
-            <Text fontSize={14} color={discordColors.textMuted} textAlign="center">
-              Start a conversation with a friend or join a nest
-            </Text>
-          </YStack>
+          <EmptyState
+            icon={<FontAwesome name="comment-o" size={36} color={discordColors.textMuted} />}
+            title="No messages yet"
+            subtitle="Start a conversation with a friend or join a nest"
+          />
         }
       />
     </YStack>

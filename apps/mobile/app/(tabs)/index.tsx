@@ -1,17 +1,21 @@
 import { useEffect, useState, useCallback } from 'react'
-import { FlatList, RefreshControl, Pressable, Image } from 'react-native'
-import { YStack, XStack, Text, Spinner, Stack } from 'tamagui'
+import { FlatList, RefreshControl, Pressable } from 'react-native'
+import { YStack, XStack, Text } from 'tamagui'
 import { useAuth } from '../../src/auth/AuthContext'
 import type { Friendship, User } from '@wakeup/api-client'
 import { api } from '../../src/api/client'
 import { discordColors } from '../../src/theme/colors'
 import { useRouter, useFocusEffect } from 'expo-router'
+import { MobileAvatar, LoadingState, EmptyState } from '../../src/components'
+import { useResponsive } from '../../src/hooks/useResponsive'
+import FontAwesome from '@expo/vector-icons/FontAwesome'
 
 type Tab = 'online' | 'all' | 'pending'
 
 export default function FriendsScreen() {
-  const { user } = useAuth()
+  const { user, socket } = useAuth()
   const router = useRouter()
+  const { px, avatarSize } = useResponsive()
   const [tab, setTab] = useState<Tab>('online')
   const [friends, setFriends] = useState<Friendship[]>([])
   const [pending, setPending] = useState<Friendship[]>([])
@@ -32,15 +36,8 @@ export default function FriendsScreen() {
     setIsRefreshing(false)
   }, [])
 
-  // Refresh data when screen comes into focus
-  useFocusEffect(
-    useCallback(() => {
-      loadData()
-    }, [loadData])
-  )
+  useFocusEffect(useCallback(() => { loadData() }, [loadData]))
 
-  // Listen for real-time WebSocket events
-  const { socket } = useAuth()
   useEffect(() => {
     if (!socket) return
     const refresh = () => loadData()
@@ -54,56 +51,34 @@ export default function FriendsScreen() {
     }
   }, [socket, loadData])
 
-  const handleRefresh = () => {
-    setIsRefreshing(true)
-    loadData()
-  }
+  const handleRefresh = () => { setIsRefreshing(true); loadData() }
 
   const handleAccept = async (id: string) => {
-    try {
-      await api.acceptFriendRequest(id)
-      loadData()
-    } catch (error) {
-      console.error('Failed to accept request:', error)
-    }
+    try { await api.acceptFriendRequest(id); loadData() } catch {}
   }
 
   const handleReject = async (id: string) => {
-    try {
-      await api.rejectFriendRequest(id)
-      loadData()
-    } catch (error) {
-      console.error('Failed to reject request:', error)
-    }
+    try { await api.rejectFriendRequest(id); loadData() } catch {}
   }
 
   const handleStartDM = async (userId: string) => {
     try {
       const conv = await api.createDM(userId)
       router.push(`/dm/${conv.id}`)
-    } catch (error) {
-      console.error('Failed to create DM:', error)
-    }
+    } catch {}
   }
 
-  const getFriendUser = (friendship: Friendship): { id: string; name: string; avatar_url?: string | null } => {
-    if (friendship.user) {
-      return { id: friendship.user.id, name: friendship.user.display_name, avatar_url: friendship.user.avatar_url }
-    }
-    const friendId = friendship.requester_id === user?.id ? friendship.addressee_id : friendship.requester_id
-    return { id: friendId, name: 'User' }
+  const getFriend = (f: Friendship) => {
+    if (f.user) return { id: f.user.id, name: f.user.display_name, avatar: f.user.avatar_url }
+    const friendId = f.requester_id === user?.id ? f.addressee_id : f.requester_id
+    return { id: friendId, name: 'User', avatar: undefined }
   }
 
-  const getStatusColor = (status?: string) => {
-    switch (status) {
-      case 'online': return discordColors.statusOnline
-      case 'idle': return discordColors.statusIdle
-      case 'dnd': return discordColors.statusDnd
-      default: return discordColors.statusOffline
-    }
-  }
+  const getStatus = (userId: string) => onlineFriends.find((f) => f.id === userId)?.status || 'offline'
 
-  const renderTabButton = (t: Tab, label: string, count?: number) => (
+  if (isLoading) return <LoadingState />
+
+  const tabBtn = (t: Tab, label: string, count?: number) => (
     <Pressable key={t} onPress={() => setTab(t)} style={{ flex: 1 }}>
       <YStack
         paddingVertical={10}
@@ -112,22 +87,11 @@ export default function FriendsScreen() {
         borderBottomColor={tab === t ? discordColors.brandPrimary : 'transparent'}
       >
         <XStack alignItems="center" gap={6}>
-          <Text
-            fontSize={14}
-            fontWeight="600"
-            color={tab === t ? discordColors.textNormal : discordColors.textMuted}
-          >
+          <Text fontSize={14} fontWeight="600" color={tab === t ? discordColors.textNormal : discordColors.textMuted}>
             {label}
           </Text>
           {count !== undefined && count > 0 && (
-            <YStack
-              backgroundColor={discordColors.brandPrimary}
-              borderRadius={10}
-              paddingHorizontal={6}
-              paddingVertical={1}
-              minWidth={20}
-              alignItems="center"
-            >
+            <YStack backgroundColor={discordColors.brandPrimary} borderRadius={10} paddingHorizontal={6} paddingVertical={1} minWidth={20} alignItems="center">
               <Text fontSize={11} fontWeight="700" color="white">{count}</Text>
             </YStack>
           )}
@@ -136,50 +100,15 @@ export default function FriendsScreen() {
     </Pressable>
   )
 
-  if (isLoading) {
+  const renderFriend = ({ item }: { item: Friendship }) => {
+    const f = getFriend(item)
+    const status = getStatus(f.id) as 'online' | 'idle' | 'dnd' | 'offline'
     return (
-      <YStack flex={1} alignItems="center" justifyContent="center" backgroundColor={discordColors.bgPrimary}>
-        <Spinner size="large" color={discordColors.brandPrimary} />
-      </YStack>
-    )
-  }
-
-  const renderFriendItem = ({ item }: { item: Friendship }) => {
-    const friend = getFriendUser(item)
-    const onlineFriend = onlineFriends.find((f) => f.id === friend.id)
-    const status = onlineFriend?.status || 'offline'
-    return (
-      <Pressable onPress={() => handleStartDM(friend.id)}>
-        <XStack
-          paddingHorizontal={16}
-          paddingVertical={12}
-          alignItems="center"
-          gap={12}
-          borderBottomWidth={1}
-          borderBottomColor={discordColors.border}
-        >
-          <Stack position="relative">
-            {friend.avatar_url ? (
-              <Image source={{ uri: friend.avatar_url }} style={{ width: 40, height: 40, borderRadius: 20 }} />
-            ) : (
-              <Stack width={40} height={40} borderRadius={20} backgroundColor={discordColors.brandPrimary} alignItems="center" justifyContent="center">
-                <Text fontSize={16} color="white" fontWeight="600">{friend.name.charAt(0).toUpperCase()}</Text>
-              </Stack>
-            )}
-            <Stack
-              position="absolute"
-              bottom={0}
-              right={0}
-              width={14}
-              height={14}
-              borderRadius={7}
-              backgroundColor={getStatusColor(status)}
-              borderWidth={2}
-              borderColor={discordColors.bgPrimary}
-            />
-          </Stack>
+      <Pressable onPress={() => handleStartDM(f.id)}>
+        <XStack paddingHorizontal={px} paddingVertical={12} alignItems="center" gap={12} borderBottomWidth={1} borderBottomColor={discordColors.border}>
+          <MobileAvatar src={f.avatar} fallback={f.name} size="md" status={status} />
           <YStack flex={1}>
-            <Text fontSize={15} fontWeight="600" color={discordColors.textNormal}>{friend.name}</Text>
+            <Text fontSize={15} fontWeight="600" color={discordColors.textNormal}>{f.name}</Text>
             <Text fontSize={13} color={discordColors.textMuted} textTransform="capitalize">{status}</Text>
           </YStack>
         </XStack>
@@ -187,36 +116,10 @@ export default function FriendsScreen() {
     )
   }
 
-  const renderOnlineItem = ({ item }: { item: User & { status: string } }) => (
+  const renderOnline = ({ item }: { item: User & { status: string } }) => (
     <Pressable onPress={() => handleStartDM(item.id)}>
-      <XStack
-        paddingHorizontal={16}
-        paddingVertical={12}
-        alignItems="center"
-        gap={12}
-        borderBottomWidth={1}
-        borderBottomColor={discordColors.border}
-      >
-        <Stack position="relative">
-          {item.avatar_url ? (
-            <Image source={{ uri: item.avatar_url }} style={{ width: 40, height: 40, borderRadius: 20 }} />
-          ) : (
-            <Stack width={40} height={40} borderRadius={20} backgroundColor={discordColors.brandPrimary} alignItems="center" justifyContent="center">
-              <Text fontSize={16} color="white" fontWeight="600">{item.display_name.charAt(0).toUpperCase()}</Text>
-            </Stack>
-          )}
-          <Stack
-            position="absolute"
-            bottom={0}
-            right={0}
-            width={14}
-            height={14}
-            borderRadius={7}
-            backgroundColor={getStatusColor(item.status)}
-            borderWidth={2}
-            borderColor={discordColors.bgPrimary}
-          />
-        </Stack>
+      <XStack paddingHorizontal={px} paddingVertical={12} alignItems="center" gap={12} borderBottomWidth={1} borderBottomColor={discordColors.border}>
+        <MobileAvatar src={item.avatar_url} fallback={item.display_name} size="md" status={item.status as any} />
         <YStack flex={1}>
           <Text fontSize={15} fontWeight="600" color={discordColors.textNormal}>{item.display_name}</Text>
           <Text fontSize={13} color={discordColors.textMuted} textTransform="capitalize">{item.status}</Text>
@@ -225,56 +128,23 @@ export default function FriendsScreen() {
     </Pressable>
   )
 
-  const renderPendingItem = ({ item }: { item: Friendship }) => {
+  const renderPending = ({ item }: { item: Friendship }) => {
     const isIncoming = item.addressee_id === user?.id
-    const friend = getFriendUser(item)
+    const f = getFriend(item)
     return (
-      <XStack
-        paddingHorizontal={16}
-        paddingVertical={12}
-        alignItems="center"
-        gap={12}
-        borderBottomWidth={1}
-        borderBottomColor={discordColors.border}
-      >
-        {friend.avatar_url ? (
-          <Image source={{ uri: friend.avatar_url }} style={{ width: 40, height: 40, borderRadius: 20 }} />
-        ) : (
-          <Stack width={40} height={40} borderRadius={20} backgroundColor={discordColors.bgModifierActive} alignItems="center" justifyContent="center">
-            <Text fontSize={16} color={discordColors.textMuted} fontWeight="600">{friend.name.charAt(0).toUpperCase()}</Text>
-          </Stack>
-        )}
+      <XStack paddingHorizontal={px} paddingVertical={12} alignItems="center" gap={12} borderBottomWidth={1} borderBottomColor={discordColors.border}>
+        <MobileAvatar src={f.avatar} fallback={f.name} size="md" />
         <YStack flex={1}>
-          <Text fontSize={15} fontWeight="600" color={discordColors.textNormal}>{friend.name}</Text>
-          <Text fontSize={13} color={discordColors.textMuted}>
-            {isIncoming ? 'Incoming request' : 'Outgoing request'}
-          </Text>
+          <Text fontSize={15} fontWeight="600" color={discordColors.textNormal}>{f.name}</Text>
+          <Text fontSize={13} color={discordColors.textMuted}>{isIncoming ? 'Incoming request' : 'Outgoing request'}</Text>
         </YStack>
         {isIncoming && (
           <XStack gap={8}>
-            <Pressable onPress={() => handleAccept(item.id)}>
-              <Stack
-                width={36}
-                height={36}
-                borderRadius={18}
-                backgroundColor={discordColors.green}
-                alignItems="center"
-                justifyContent="center"
-              >
-                <Text fontSize={18} color="white">✓</Text>
-              </Stack>
+            <Pressable onPress={() => handleAccept(item.id)} style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: discordColors.green, alignItems: 'center', justifyContent: 'center' }}>
+              <FontAwesome name="check" size={16} color="#fff" />
             </Pressable>
-            <Pressable onPress={() => handleReject(item.id)}>
-              <Stack
-                width={36}
-                height={36}
-                borderRadius={18}
-                backgroundColor={discordColors.red}
-                alignItems="center"
-                justifyContent="center"
-              >
-                <Text fontSize={18} color="white">✕</Text>
-              </Stack>
+            <Pressable onPress={() => handleReject(item.id)} style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: discordColors.red, alignItems: 'center', justifyContent: 'center' }}>
+              <FontAwesome name="close" size={16} color="#fff" />
             </Pressable>
           </XStack>
         )}
@@ -282,61 +152,27 @@ export default function FriendsScreen() {
     )
   }
 
+  const refreshControl = <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} tintColor={discordColors.textMuted} />
+
   return (
     <YStack flex={1} backgroundColor={discordColors.bgPrimary}>
-      {/* Tab bar */}
       <XStack backgroundColor={discordColors.bgSecondary} borderBottomWidth={1} borderBottomColor={discordColors.border}>
-        {renderTabButton('online', 'Online', onlineFriends.length)}
-        {renderTabButton('all', 'All', friends.length)}
-        {renderTabButton('pending', 'Pending', pending.length)}
+        {tabBtn('online', 'Online', onlineFriends.length)}
+        {tabBtn('all', 'All', friends.length)}
+        {tabBtn('pending', 'Pending', pending.length)}
       </XStack>
 
       {tab === 'online' && (
-        <FlatList
-          data={onlineFriends}
-          keyExtractor={(item) => item.id}
-          renderItem={renderOnlineItem}
-          refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} tintColor={discordColors.textMuted} />}
-          ListEmptyComponent={
-            <YStack alignItems="center" padding={48} gap={12}>
-              <Text fontSize={48}>😴</Text>
-              <Text fontSize={16} fontWeight="500" color={discordColors.textNormal}>No one's online</Text>
-              <Text fontSize={14} color={discordColors.textMuted} textAlign="center">Your friends will appear here when they're online</Text>
-            </YStack>
-          }
-        />
+        <FlatList data={onlineFriends} keyExtractor={(i) => i.id} renderItem={renderOnline} refreshControl={refreshControl}
+          ListEmptyComponent={<EmptyState icon={<FontAwesome name="moon-o" size={36} color={discordColors.textMuted} />} title="No one's online" subtitle="Your friends will appear here when they're awake" />} />
       )}
-
       {tab === 'all' && (
-        <FlatList
-          data={friends}
-          keyExtractor={(item) => item.id}
-          renderItem={renderFriendItem}
-          refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} tintColor={discordColors.textMuted} />}
-          ListEmptyComponent={
-            <YStack alignItems="center" padding={48} gap={12}>
-              <Text fontSize={48}>👋</Text>
-              <Text fontSize={16} fontWeight="500" color={discordColors.textNormal}>No friends yet</Text>
-              <Text fontSize={14} color={discordColors.textMuted} textAlign="center">Add friends to start chatting</Text>
-            </YStack>
-          }
-        />
+        <FlatList data={friends} keyExtractor={(i) => i.id} renderItem={renderFriend} refreshControl={refreshControl}
+          ListEmptyComponent={<EmptyState icon={<FontAwesome name="user-plus" size={36} color={discordColors.textMuted} />} title="No friends yet" subtitle="Add friends to start chatting" />} />
       )}
-
       {tab === 'pending' && (
-        <FlatList
-          data={pending}
-          keyExtractor={(item) => item.id}
-          renderItem={renderPendingItem}
-          refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} tintColor={discordColors.textMuted} />}
-          ListEmptyComponent={
-            <YStack alignItems="center" padding={48} gap={12}>
-              <Text fontSize={48}>📬</Text>
-              <Text fontSize={16} fontWeight="500" color={discordColors.textNormal}>No pending requests</Text>
-              <Text fontSize={14} color={discordColors.textMuted} textAlign="center">Friend requests will appear here</Text>
-            </YStack>
-          }
-        />
+        <FlatList data={pending} keyExtractor={(i) => i.id} renderItem={renderPending} refreshControl={refreshControl}
+          ListEmptyComponent={<EmptyState icon={<FontAwesome name="envelope-o" size={36} color={discordColors.textMuted} />} title="No pending requests" subtitle="Friend requests will appear here" />} />
       )}
     </YStack>
   )

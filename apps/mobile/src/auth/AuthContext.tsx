@@ -4,6 +4,16 @@ import type { User } from '@wakeup/api-client'
 import { WakeupSocket } from '@wakeup/api-client'
 import { api, API_URL } from '../api/client'
 import { getTokens, clearTokens } from './tokenStore'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+
+const YOU_WAKE_KEY = 'wakeup-you-wake-ts'
+const EXPIRY_MS = 6 * 60 * 60 * 1000
+
+async function shouldShowYouWake(): Promise<boolean> {
+  const ts = await AsyncStorage.getItem(YOU_WAKE_KEY)
+  if (!ts) return true
+  return Date.now() - parseInt(ts, 10) > EXPIRY_MS
+}
 
 const WS_URL = API_URL.replace('http', 'ws') + '/ws'
 
@@ -64,11 +74,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (isLoading) return
 
     const inAuthGroup = segments[0] === 'login'
+    const inYouWake = segments[0] === 'you-wake'
 
     if (!user && !inAuthGroup) {
       router.replace('/login')
     } else if (user && inAuthGroup) {
-      router.replace('/(tabs)')
+      // Route through YouWake on login
+      shouldShowYouWake().then((show) => {
+        router.replace(show ? '/you-wake' : '/(tabs)')
+      })
     }
   }, [user, segments, isLoading])
 

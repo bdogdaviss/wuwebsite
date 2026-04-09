@@ -88,19 +88,20 @@ export function DirectMessage() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* Chat area */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '16px 16px 0' }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: isMobile ? '12px 12px 0' : '16px 16px 0' }}>
         {/* DM intro header */}
-        <div style={{ padding: '16px 0 24px' }}>
+        <div style={{ padding: isMobile ? '12px 0 16px' : '16px 0 24px' }}>
           <div style={{ marginBottom: 12 }}>
-            <Avatar src={otherMembers[0]?.avatar_url} fallback={dmName} size="xl" />
+            <Avatar src={otherMembers[0]?.avatar_url} fallback={dmName} size={isMobile ? 'lg' : 'xl'} />
           </div>
 
           <div
             style={{
-              fontSize: 32,
+              fontSize: isMobile ? 22 : 32,
               fontWeight: 700,
               color: discordColors.headerPrimary,
               marginBottom: 4,
+              wordBreak: 'break-word',
             }}
           >
             {dmName}
@@ -155,7 +156,9 @@ export function DirectMessage() {
               key={msg.id}
               style={{
                 display: 'flex',
-                padding: showHeader ? '4px 16px 0' : '0 16px 0 72px',
+                padding: showHeader
+                  ? (isMobile ? '4px 8px 0' : '4px 16px 0')
+                  : (isMobile ? '0 8px 0 52px' : '0 16px 0 72px'),
                 marginTop: showHeader ? 16 : 0,
               }}
               onMouseEnter={(e) => {
@@ -166,11 +169,11 @@ export function DirectMessage() {
               }}
             >
               {showHeader && (
-                <div style={{ width: 40, marginRight: 16, flexShrink: 0, paddingTop: 2 }}>
+                <div style={{ width: isMobile ? 32 : 40, marginRight: isMobile ? 8 : 16, flexShrink: 0, paddingTop: 2 }}>
                   <Avatar
                     src={isMe ? user?.avatar_url : msg.sender?.avatar_url}
                     fallback={senderName}
-                    size="md"
+                    size={isMobile ? 'sm' : 'md'}
                   />
                 </div>
               )}

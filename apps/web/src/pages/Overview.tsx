@@ -262,7 +262,7 @@ function FriendsListView() {
                             position: 'absolute',
                             top: 40,
                             right: 0,
-                            width: 188,
+                            width: 'clamp(160px, 50vw, 188px)',
                             backgroundColor: '#111214',
                             borderRadius: 4,
                             padding: '6px 8px',

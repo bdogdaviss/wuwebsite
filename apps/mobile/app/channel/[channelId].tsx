@@ -1,15 +1,19 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
-import { FlatList, TextInput, KeyboardAvoidingView, Platform, Pressable } from 'react-native'
-import { YStack, XStack, Text, Stack } from 'tamagui'
+import { FlatList, KeyboardAvoidingView, Platform } from 'react-native'
+import { YStack, XStack, Text } from 'tamagui'
 import { useLocalSearchParams } from 'expo-router'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useAuth } from '../../src/auth/AuthContext'
 import type { ChannelMessage } from '@wakeup/api-client'
 import { api } from '../../src/api/client'
 import { discordColors } from '../../src/theme/colors'
+import { ChatInput, MobileAvatar, EmptyState } from '../../src/components'
+import FontAwesome from '@expo/vector-icons/FontAwesome'
 
 export default function ChannelChatScreen() {
   const { channelId } = useLocalSearchParams<{ channelId: string }>()
-  const { user } = useAuth()
+  const { user, socket } = useAuth()
+  const insets = useSafeAreaInsets()
   const [messages, setMessages] = useState<ChannelMessage[]>([])
   const [inputText, setInputText] = useState('')
   const [isSending, setIsSending] = useState(false)
@@ -29,8 +33,6 @@ export default function ChannelChatScreen() {
     loadMessages()
   }, [loadMessages])
 
-  // Listen for new channel messages via WebSocket
-  const { socket } = useAuth()
   useEffect(() => {
     if (!socket || !channelId) return
     const handleNewMessage = (data: unknown) => {
@@ -68,19 +70,30 @@ export default function ChannelChatScreen() {
     const time = new Date(item.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 
     return (
-      <YStack paddingHorizontal={16} paddingTop={showHeader ? 12 : 2}>
-        {showHeader && (
-          <XStack alignItems="baseline" gap={8} marginBottom={2}>
-            <Text fontSize={15} fontWeight="600" color={isMe ? discordColors.brandPrimary : discordColors.textNormal}>
-              {senderName}
-            </Text>
-            <Text fontSize={11} color={discordColors.textMuted}>{time}</Text>
-          </XStack>
+      <XStack paddingHorizontal={12} paddingTop={showHeader ? 12 : 2} gap={10}>
+        {showHeader ? (
+          <MobileAvatar
+            src={isMe ? user?.avatar_url : item.sender?.avatar_url}
+            fallback={senderName}
+            size="sm"
+          />
+        ) : (
+          <YStack width={32} />
         )}
-        <Text fontSize={15} color={discordColors.textNormal} lineHeight={22}>
-          {item.content}
-        </Text>
-      </YStack>
+        <YStack flex={1}>
+          {showHeader && (
+            <XStack alignItems="baseline" gap={8} marginBottom={2}>
+              <Text fontSize={15} fontWeight="600" color={isMe ? discordColors.brandPrimary : discordColors.textNormal}>
+                {senderName}
+              </Text>
+              <Text fontSize={11} color={discordColors.textMuted}>{time}</Text>
+            </XStack>
+          )}
+          <Text fontSize={15} color={discordColors.textNormal} lineHeight={22}>
+            {item.content}
+          </Text>
+        </YStack>
+      </XStack>
     )
   }
 
@@ -88,70 +101,31 @@ export default function ChannelChatScreen() {
     <KeyboardAvoidingView
       style={{ flex: 1, backgroundColor: discordColors.bgPrimary }}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      keyboardVerticalOffset={90}
+      keyboardVerticalOffset={insets.top + 56}
     >
       <FlatList
         ref={flatListRef}
         data={messages}
         keyExtractor={(item) => item.id}
         renderItem={renderMessage}
-        contentContainerStyle={{ paddingBottom: 8 }}
+        contentContainerStyle={{ paddingBottom: 8, flexGrow: 1 }}
         onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: false })}
         ListEmptyComponent={
-          <YStack flex={1} alignItems="center" justifyContent="center" padding={48}>
-            <Text fontSize={48}>#</Text>
-            <Text fontSize={16} fontWeight="500" color={discordColors.textNormal} marginTop={12}>
-              Welcome to the channel
-            </Text>
-            <Text fontSize={14} color={discordColors.textMuted} textAlign="center" marginTop={4}>
-              Send a message to get the conversation started
-            </Text>
-          </YStack>
+          <EmptyState
+            icon={<FontAwesome name="hashtag" size={40} color={discordColors.textMuted} />}
+            title="Welcome to the channel"
+            subtitle="Send a message to get the conversation started"
+          />
         }
       />
 
-      {/* Message input */}
-      <XStack
-        backgroundColor={discordColors.bgSecondary}
-        padding={12}
-        gap={8}
-        alignItems="flex-end"
-        borderTopWidth={1}
-        borderTopColor={discordColors.border}
-      >
-        <TextInput
-          value={inputText}
-          onChangeText={setInputText}
-          placeholder="Message..."
-          placeholderTextColor={discordColors.textMuted}
-          multiline
-          maxLength={2000}
-          style={{
-            flex: 1,
-            backgroundColor: discordColors.bgTertiary,
-            borderRadius: 8,
-            paddingHorizontal: 12,
-            paddingVertical: 10,
-            fontSize: 16,
-            color: discordColors.textNormal,
-            maxHeight: 100,
-          }}
-          onSubmitEditing={handleSend}
-          returnKeyType="send"
-        />
-        <Pressable onPress={handleSend} disabled={!inputText.trim() || isSending}>
-          <Stack
-            width={40}
-            height={40}
-            borderRadius={20}
-            backgroundColor={inputText.trim() ? discordColors.brandPrimary : discordColors.bgModifierActive}
-            alignItems="center"
-            justifyContent="center"
-          >
-            <Text fontSize={18} color="white">→</Text>
-          </Stack>
-        </Pressable>
-      </XStack>
+      <ChatInput
+        value={inputText}
+        onChangeText={setInputText}
+        onSend={handleSend}
+        isSending={isSending}
+        placeholder="Message #channel"
+      />
     </KeyboardAvoidingView>
   )
 }

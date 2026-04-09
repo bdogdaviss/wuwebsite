@@ -85,8 +85,8 @@ export function CreateGroupDm() {
       <div
         onClick={(e) => e.stopPropagation()}
         style={{
-          width: 440,
-          maxHeight: '80vh',
+          width: 'clamp(300px, 92vw, 440px)',
+          maxHeight: '85vh',
           backgroundColor: discordColors.bgPrimary,
           borderRadius: 8,
           display: 'flex',

@@ -1,8 +1,6 @@
-import { createTamagui } from 'tamagui'
-import { config as tamaguiConfig } from '@tamagui/config/v3'
+import { config } from '@wakeup/ui-tamagui'
 
-export const config = createTamagui(tamaguiConfig)
-
+export { config }
 export default config
 
 export type AppConfig = typeof config

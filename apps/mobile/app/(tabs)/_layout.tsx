@@ -1,6 +1,7 @@
 import React from 'react'
 import FontAwesome from '@expo/vector-icons/FontAwesome'
 import { Tabs } from 'expo-router'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { discordColors } from '../../src/theme/colors'
 
 function TabBarIcon(props: {
@@ -11,6 +12,8 @@ function TabBarIcon(props: {
 }
 
 export default function TabLayout() {
+  const insets = useSafeAreaInsets()
+
   return (
     <Tabs
       screenOptions={{
@@ -20,9 +23,9 @@ export default function TabLayout() {
           backgroundColor: discordColors.bgTertiary,
           borderTopColor: discordColors.border,
           borderTopWidth: 1,
-          height: 60,
-          paddingBottom: 8,
-          paddingTop: 8,
+          height: 56 + insets.bottom,
+          paddingBottom: 6 + insets.bottom,
+          paddingTop: 6,
         },
         tabBarLabelStyle: {
           fontSize: 11,
@@ -30,13 +33,16 @@ export default function TabLayout() {
         },
         headerStyle: {
           backgroundColor: discordColors.bgSecondary,
-          borderBottomColor: discordColors.border,
-          borderBottomWidth: 1,
+          shadowColor: 'rgba(0,0,0,0.3)',
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 1,
+          shadowRadius: 0,
+          elevation: 4,
         },
         headerTitleStyle: {
-          color: discordColors.textNormal,
+          color: discordColors.headerPrimary,
           fontWeight: '600',
-          fontSize: 16,
+          fontSize: 17,
         },
         headerTintColor: discordColors.textNormal,
         headerShown: true,
@@ -46,7 +52,6 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Friends',
-          headerTitle: 'Friends',
           tabBarIcon: ({ color }) => <TabBarIcon name="users" color={color} />,
         }}
       />
@@ -54,33 +59,26 @@ export default function TabLayout() {
         name="messages"
         options={{
           title: 'Messages',
-          headerTitle: 'Messages',
           tabBarIcon: ({ color }) => <TabBarIcon name="comments" color={color} />,
         }}
       />
       <Tabs.Screen
-        name="focus"
+        name="discover"
         options={{
-          title: 'Focus',
-          headerTitle: 'Focus Sessions',
-          tabBarIcon: ({ color }) => <TabBarIcon name="clock-o" color={color} />,
+          title: 'Discover',
+          tabBarIcon: ({ color }) => <TabBarIcon name="compass" color={color} />,
         }}
       />
       <Tabs.Screen
         name="settings"
         options={{
-          title: 'Settings',
-          headerTitle: 'Settings',
-          tabBarIcon: ({ color }) => <TabBarIcon name="cog" color={color} />,
+          title: 'Me',
+          tabBarIcon: ({ color }) => <TabBarIcon name="user" color={color} />,
         }}
       />
-      {/* Hide routines from tab bar — kept for backwards compat */}
-      <Tabs.Screen
-        name="routines"
-        options={{
-          href: null,
-        }}
-      />
+      {/* Hidden from tab bar */}
+      <Tabs.Screen name="focus" options={{ href: null }} />
+      <Tabs.Screen name="routines" options={{ href: null }} />
     </Tabs>
   )
 }

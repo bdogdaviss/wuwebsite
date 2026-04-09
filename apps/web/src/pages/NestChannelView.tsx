@@ -89,14 +89,14 @@ export function NestChannelView() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* Chat area */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '16px 16px 0' }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: isMobile ? '12px 12px 0' : '16px 16px 0' }}>
         {/* Channel welcome */}
-        <div style={{ padding: '16px 0 24px' }}>
+        <div style={{ padding: isMobile ? '12px 0 16px' : '16px 0 24px' }}>
           <div
             style={{
-              width: 68,
-              height: 68,
-              borderRadius: 34,
+              width: isMobile ? 48 : 68,
+              height: isMobile ? 48 : 68,
+              borderRadius: isMobile ? 24 : 34,
               backgroundColor: discordColors.bgModifierActive,
               display: 'flex',
               alignItems: 'center',
@@ -104,14 +104,15 @@ export function NestChannelView() {
               marginBottom: 12,
             }}
           >
-            <Hash size={36} color={discordColors.headerPrimary} />
+            <Hash size={isMobile ? 24 : 36} color={discordColors.headerPrimary} />
           </div>
           <div
             style={{
-              fontSize: 32,
+              fontSize: isMobile ? 22 : 32,
               fontWeight: 700,
               color: discordColors.headerPrimary,
               marginBottom: 8,
+              wordBreak: 'break-word',
             }}
           >
             Welcome to #{channel.name}!
@@ -163,7 +164,9 @@ export function NestChannelView() {
               key={msg.id}
               style={{
                 display: 'flex',
-                padding: showHeader ? '4px 16px 0' : '0 16px 0 72px',
+                padding: showHeader
+                  ? (isMobile ? '4px 8px 0' : '4px 16px 0')
+                  : (isMobile ? '0 8px 0 52px' : '0 16px 0 72px'),
                 marginTop: showHeader ? 16 : 0,
               }}
               onMouseEnter={(e) => {
@@ -174,11 +177,11 @@ export function NestChannelView() {
               }}
             >
               {showHeader && (
-                <div style={{ width: 40, marginRight: 16, flexShrink: 0, paddingTop: 2 }}>
+                <div style={{ width: isMobile ? 32 : 40, marginRight: isMobile ? 8 : 16, flexShrink: 0, paddingTop: 2 }}>
                   <Avatar
                     src={isMe ? user?.avatar_url : msg.sender?.avatar_url}
                     fallback={senderName}
-                    size="md"
+                    size={isMobile ? 'sm' : 'md'}
                   />
                 </div>
               )}
